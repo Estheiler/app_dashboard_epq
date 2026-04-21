@@ -219,6 +219,33 @@ html, body {
   color: #fff;
 }
 
+.sync-button {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  margin-right: 8px;
+}
+
+.sync-button:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: var(--blue-light);
+  transform: rotate(45deg);
+}
+
+.sync-button:active {
+  transform: rotate(180deg);
+}
+
 .avatar {
   width: 36px;
   height: 36px;

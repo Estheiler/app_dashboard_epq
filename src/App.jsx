@@ -19,6 +19,7 @@ function App() {
     selectedMonth,
     changeYear,
     changeMonth,
+    refreshData,
   } = useExcelData();
 
   if (loading) {
@@ -50,6 +51,7 @@ function App() {
         selectedMonth={selectedMonth}
         onYearChange={changeYear}
         onMonthChange={changeMonth}
+        onRefresh={refreshData}
       />
 
       <div className="top-charts-grid">

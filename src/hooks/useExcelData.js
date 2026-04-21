@@ -7,20 +7,22 @@ import {
 } from '../utils/dataParser';
 
 export function useExcelData(filePath = '/indicadores_epq.xlsx') {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [availableYears, setAvailableYears] = useState([]);
-  const [selectedYear, setSelectedYear] = useState(null);
-  const [selectedMonth, setSelectedMonth] = useState(null);
-  const [availableMonths, setAvailableMonths] = useState([]);
+  const [version, setVersion] = useState(0);
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+  const refreshData = () => {
+    setVersion(v => v + 1);
+  };
 
   useEffect(() => {
     async function loadExcel() {
       try {
         setLoading(true);
-        const response = await fetch(filePath);
+        // Cache-buster: añadimos timestamp a la URL
+        const fetchUrl = `${filePath}?t=${Date.now()}`;
+        const response = await fetch(fetchUrl);
         if (!response.ok) throw new Error(`No se pudo cargar ${filePath}`);
+        
         const arrayBuffer = await response.arrayBuffer();
         const wb = XLSX.read(arrayBuffer, { type: 'array' });
         const sheetName = wb.SheetNames[0];
@@ -36,15 +38,17 @@ export function useExcelData(filePath = '/indicadores_epq.xlsx') {
         const years = getAvailableYears(parsed);
         setAvailableYears(years);
 
-        // Default: último año disponible
-        const defaultYear = years[years.length - 1];
-        setSelectedYear(defaultYear);
+        // Si ya hay un año seleccionado, intentar preservarlo, sino usar el último
+        const defaultYear = selectedYear || years[years.length - 1];
+        if (!selectedYear) setSelectedYear(defaultYear);
 
         const months = getAvailableMonths(parsed, defaultYear);
         setAvailableMonths(months);
 
-        // Default: último mes disponible del último año
-        setSelectedMonth(months[months.length - 1]);
+        // Si ya hay un mes seleccionado, intentar preservarlo, sino usar el último
+        if (!selectedMonth) setSelectedMonth(months[months.length - 1]);
+        
+        setLastUpdated(new Date());
       } catch (err) {
         setError(err.message);
       } finally {
@@ -53,7 +57,7 @@ export function useExcelData(filePath = '/indicadores_epq.xlsx') {
     }
 
     loadExcel();
-  }, [filePath]);
+  }, [filePath, version]);
 
   // Cuando cambia el año, recalcular meses disponibles
   const changeYear = (year) => {
