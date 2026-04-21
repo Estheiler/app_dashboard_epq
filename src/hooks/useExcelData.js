@@ -7,6 +7,13 @@ import {
 } from '../utils/dataParser';
 
 export function useExcelData(filePath = '/indicadores_epq.xlsx') {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [availableYears, setAvailableYears] = useState([]);
+  const [selectedYear, setSelectedYear] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(null);
+  const [availableMonths, setAvailableMonths] = useState([]);
   const [version, setVersion] = useState(0);
   const [lastUpdated, setLastUpdated] = useState(null);
 

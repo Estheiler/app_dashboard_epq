@@ -7,7 +7,8 @@ const Header = ({
   selectedYear, 
   selectedMonth, 
   onYearChange, 
-  onMonthChange 
+  onMonthChange,
+  onRefresh
 }) => {
   const yearOptions = availableYears.map(year => ({ value: year, label: `Año ${year}` }));
   const monthOptions = availableMonths.map(month => ({ 
@@ -18,8 +19,15 @@ const Header = ({
   return (
     <header className="header">
       <div className="header-left">
-        <h1 className="header-title">Indicadores Técnicos de Servicios Públicos</h1>
-        <p className="header-subtitle">Monitoreo para la gestión operativa</p>
+        <img 
+          src="/logo_epq_horizontal.png" 
+          alt="Logo EPQ" 
+          className="header-logo"
+        />
+        <div className="header-text-block">
+          <h1 className="header-title">Indicadores Técnicos de Servicios Públicos</h1>
+          <p className="header-subtitle">Monitoreo para la gestión operativa</p>
+        </div>
       </div>
 
       <div className="header-right">

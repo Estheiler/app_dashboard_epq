@@ -5,8 +5,6 @@ import MicromedicionChart from './MicromedicionChart';
 import { calcIancAcumulado, getLastNMonths } from '../utils/dataParser';
 
 const AcueductoSection = ({ allData, currentData, yearlyData, selectedYear, selectedMonth }) => {
-  const iancAcum = calcIancAcumulado(allData, selectedYear, selectedMonth);
-
   return (
     <section className="acueducto-section">
       <div className="section-header">
@@ -39,13 +37,13 @@ const AcueductoSection = ({ allData, currentData, yearlyData, selectedYear, sele
         />
         <KpiCard 
           label="IANC" 
-          value={currentData?.ianc} 
+          value={currentData?.iancMensual} 
           suffix="%" 
           ianc={true}
         />
         <KpiCard 
           label="IANC ACUMULADO" 
-          value={iancAcum} 
+          value={currentData?.iancAcumuladoExcel} 
           suffix="%" 
           ianc={true}
         />

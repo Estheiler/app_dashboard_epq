@@ -57,17 +57,15 @@ export function parseRow(raw) {
 
   const produccion = parseNum(raw['produccion acueducto']);
   const consumo = parseNum(raw['consumo acueducto']);
-  // IANC calculado = (producción - consumo) / producción * 100
-  let iancCalculado = null;
+  
+  // IANC Mensual calculado = (producción - consumo) / producción * 100
+  let iancMensual = null;
   if (produccion !== null && consumo !== null && produccion > 0) {
-    iancCalculado = ((produccion - consumo) / produccion) * 100;
+    iancMensual = ((produccion - consumo) / produccion) * 100;
   }
 
-  // ianc promedio del excel (puede ser decimal o string)
-  const iancExcel = parsePercent(raw['ianc promedio']);
-
-  // Usamos el calculado si iancExcel es null, sino usamos el del Excel
-  const ianc = iancExcel !== null ? iancExcel : iancCalculado;
+  // IANC Acumulado (Promedio de 12 meses) viene directamente del Excel
+  const iancAcumuladoExcel = parsePercent(raw['ianc promedio']);
 
   return {
     year: dateInfo.year,
@@ -78,8 +76,8 @@ export function parseRow(raw) {
     micromedicionNominal: parsePercent(raw['Micromedicion nominal']),
     micromedicionReal: parsePercent(raw['Micromedicion real']),
     irca: parsePercent(raw['IRCA']),
-    ianc: ianc,
-    iancCalculado: iancCalculado,
+    iancMensual: iancMensual,
+    iancAcumuladoExcel: iancAcumuladoExcel,
     produccion: produccion,
     consumo: consumo,
     continuidad: parseNum(raw['Continuidad acueducto']),

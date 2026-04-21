@@ -34,7 +34,7 @@ const AseoSection = ({ currentData, previousData }) => {
         </div>
         <div style={{textAlign: 'right'}}>
           <div className="kpi-label">CONTINUIDAD</div>
-          <div className="kpi-value" style={{fontSize: '18px'}}>{currentData?.continuitadAseo || 100}%</div>
+          <div className="kpi-value" style={{fontSize: '18px'}}>{currentData?.continuidadAseo || '--'}%</div>
         </div>
       </div>
 

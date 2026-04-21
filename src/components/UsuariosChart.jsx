@@ -54,6 +54,7 @@ const UsuariosChart = ({ yearlyData }) => {
             <Tooltip 
               contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '12px' }}
               formatter={(value) => [value?.toLocaleString(), '']}
+              itemSorter={(item) => -item.value}
             />
             <Area 
                 type="monotone" 

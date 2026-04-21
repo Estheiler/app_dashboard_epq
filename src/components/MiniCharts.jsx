@@ -7,7 +7,7 @@ import { MONTH_NAMES } from '../utils/dataParser';
 export const IancAcumuladoChart = ({ chartData }) => {
   const data = chartData.map(d => ({
     name: MONTH_NAMES[d.month],
-    value: d.ianc || 0,
+    value: d.iancAcumuladoExcel || 0,
   }));
 
   return (

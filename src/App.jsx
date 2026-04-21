@@ -7,6 +7,7 @@ import UsuariosChart from './components/UsuariosChart';
 import AcueductoSection from './components/AcueductoSection';
 import AlcantarilladoSection from './components/AlcantarilladoSection';
 import AseoSection from './components/AseoSection';
+import Footer from './components/Footer';
 
 function App() {
   const {
@@ -69,20 +70,12 @@ function App() {
             selectedMonth={selectedMonth} 
           />
         </div>
-
         <div className="right-column">
           <AlcantarilladoSection currentData={currentData} />
           <AseoSection currentData={currentData} previousData={previousData} />
-          
-          <div className="logo-card">
-            <img 
-              src="/logo_epq.png" 
-              alt="Logo EPQ" 
-              style={{ width: '100%', maxWidth: '240px', height: 'auto', display: 'block', margin: '0 auto' }} 
-            />
-          </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
