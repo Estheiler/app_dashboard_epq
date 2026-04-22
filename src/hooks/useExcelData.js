@@ -79,6 +79,20 @@ export function useExcelData(filePath = '/indicadores_epq.xlsx') {
     setSelectedMonth(month);
   };
 
+  const goToLatest = () => {
+    if (!data || data.length === 0) return;
+    
+    const years = getAvailableYears(data);
+    const lastYear = years[years.length - 1];
+    
+    const months = getAvailableMonths(data, lastYear);
+    const lastMonth = months[months.length - 1];
+
+    setSelectedYear(lastYear);
+    setAvailableMonths(months);
+    setSelectedMonth(lastMonth);
+  };
+
   return {
     data,
     loading,
@@ -89,5 +103,6 @@ export function useExcelData(filePath = '/indicadores_epq.xlsx') {
     selectedMonth,
     changeYear,
     changeMonth,
+    refreshData: goToLatest,
   };
 }

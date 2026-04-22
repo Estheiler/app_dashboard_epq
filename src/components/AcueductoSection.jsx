@@ -14,37 +14,37 @@ const AcueductoSection = ({ allData, currentData, yearlyData, selectedYear, sele
           </svg>
         </div>
         <h2 className="section-title">Servicio de Acueducto</h2>
-        <div style={{flex: 1, height: '1px', background: 'var(--border)', marginLeft: '10px'}}></div>
+        <div style={{ flex: 1, height: '1px', background: 'var(--border)', marginLeft: '10px' }}></div>
       </div>
 
       <div className="kpi-row kpi-row--5">
-        <KpiCard 
-          label="COBERTURA" 
-          value={currentData?.coberturaAcueducto} 
-          suffix="%" 
+        <KpiCard
+          label="COBERTURA"
+          value={currentData?.coberturaAcueducto}
+          suffix="%"
           dot={true}
         />
-        <KpiCard 
-          label="CONTINUIDAD" 
-          value={currentData?.continuidad} 
-          suffix="h" 
+        <KpiCard
+          label="CONTINUIDAD"
+          value={currentData?.continuidad}
+          suffix="h"
         />
-        <KpiCard 
-          label="IRCA" 
-          value={currentData?.irca} 
-          suffix="%" 
+        <KpiCard
+          label="IRCA"
+          value={currentData?.irca}
+          suffix="%"
           highlight={true}
         />
-        <KpiCard 
-          label="IANC" 
-          value={currentData?.iancMensual} 
-          suffix="%" 
+        <KpiCard
+          label="IANC"
+          value={currentData?.iancMensual}
+          suffix="%"
           ianc={true}
         />
-        <KpiCard 
-          label="IANC ACUMULADO" 
-          value={currentData?.iancAcumuladoExcel} 
-          suffix="%" 
+        <KpiCard
+          label="IANC ACUMULADO"
+          value={currentData?.iancAcumuladoExcel}
+          suffix="%"
           ianc={true}
         />
       </div>
