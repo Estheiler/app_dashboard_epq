@@ -39,5 +39,5 @@ jobs:
           protocol: ftp
           # Especificamos que solo suba el contenido de la carpeta dist
           local-dir: ./dist/
-          # La carpeta destino en Hostinger (usualmente public_html para el dominio principal)
-          server-dir: ./public_html/
+          # La carpeta destino en Hostinger (usualmente es la raíz './' si el FTP apunta directo a public_html)
+          server-dir: ./
