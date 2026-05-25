@@ -36,7 +36,8 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
-          protocol: ftp
+          protocol: ftps
+          security: loose
           # Especificamos que solo suba el contenido de la carpeta dist
           local-dir: ./dist/
           # La carpeta destino en Hostinger (usualmente es la raíz './' si el FTP apunta directo a public_html)
