@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import * as XLSX from 'xlsx';
 import {
-  parseRow,
+  parseApiRow,
   getAvailableYears,
   getAvailableMonths,
 } from '../utils/dataParser';
 
-export function useExcelData(filePath = '/indicadores_epq.xlsx') {
+export function useExcelData(token, onUnauthorized) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,39 +21,66 @@ export function useExcelData(filePath = '/indicadores_epq.xlsx') {
   };
 
   useEffect(() => {
-    async function loadExcel() {
+    async function loadApiData() {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        // Cache-buster: añadimos timestamp a la URL
-        const fetchUrl = `${filePath}?t=${Date.now()}`;
-        const response = await fetch(fetchUrl);
-        if (!response.ok) throw new Error(`No se pudo cargar ${filePath}`);
-        
-        const arrayBuffer = await response.arrayBuffer();
-        const wb = XLSX.read(arrayBuffer, { type: 'array' });
-        const sheetName = wb.SheetNames[0];
-        const ws = wb.Sheets[sheetName];
-        const rawRows = XLSX.utils.sheet_to_json(ws);
+        setError(null);
 
+        const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+        const response = await fetch(`${apiBaseUrl}/indicadores-tecnicos`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.status === 401) {
+          if (onUnauthorized) {
+            onUnauthorized();
+          }
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error('No se pudieron cargar los indicadores del servidor.');
+        }
+
+        const result = await response.json();
+        const rawRows = result.data || [];
+
+        // Mapear los datos de la API usando parseApiRow
         const parsed = rawRows
-          .map(parseRow)
+          .map(parseApiRow)
           .filter(r => r !== null && r.year && r.month);
 
-        setData(parsed);
+        // Ordenamos cronológicamente (ascendente) para que coincida con el orden esperado por los gráficos
+        const sorted = parsed.sort((a, b) => {
+          if (a.year !== b.year) return a.year - b.year;
+          return a.month - b.month;
+        });
 
-        const years = getAvailableYears(parsed);
+        setData(sorted);
+
+        const years = getAvailableYears(sorted);
         setAvailableYears(years);
 
-        // Si ya hay un año seleccionado, intentar preservarlo, sino usar el último
-        const defaultYear = selectedYear || years[years.length - 1];
-        if (!selectedYear) setSelectedYear(defaultYear);
+        if (years.length > 0) {
+          // Si ya hay un año seleccionado, intentar preservarlo, sino usar el último
+          const defaultYear = selectedYear || years[years.length - 1];
+          if (!selectedYear) setSelectedYear(defaultYear);
 
-        const months = getAvailableMonths(parsed, defaultYear);
-        setAvailableMonths(months);
+          const months = getAvailableMonths(sorted, defaultYear);
+          setAvailableMonths(months);
 
-        // Si ya hay un mes seleccionado, intentar preservarlo, sino usar el último
-        if (!selectedMonth) setSelectedMonth(months[months.length - 1]);
-        
+          // Si ya hay un mes seleccionado, intentar preservarlo, sino usar el último
+          if (!selectedMonth) setSelectedMonth(months[months.length - 1]);
+        }
+
         setLastUpdated(new Date());
       } catch (err) {
         setError(err.message);
@@ -63,8 +89,8 @@ export function useExcelData(filePath = '/indicadores_epq.xlsx') {
       }
     }
 
-    loadExcel();
-  }, [filePath, version]);
+    loadApiData();
+  }, [token, version]);
 
   // Cuando cambia el año, recalcular meses disponibles
   const changeYear = (year) => {
@@ -81,10 +107,10 @@ export function useExcelData(filePath = '/indicadores_epq.xlsx') {
 
   const goToLatest = () => {
     if (!data || data.length === 0) return;
-    
+
     const years = getAvailableYears(data);
     const lastYear = years[years.length - 1];
-    
+
     const months = getAvailableMonths(data, lastYear);
     const lastMonth = months[months.length - 1];
 

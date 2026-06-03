@@ -182,3 +182,49 @@ export const MONTH_NAMES_FULL = {
   1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio',
   7: 'Julio', 8: 'Agosto', 9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
 };
+
+/**
+ * Parsea un registro de indicador devuelto por la API del backend
+ * al formato normalizado que espera la aplicación frontend.
+ */
+export function parseApiRow(item) {
+  if (!item || !item.fecha) return null;
+  
+  // Extraer año y mes del formato YYYY-MM-DD
+  const year = parseInt(item.fecha.substring(0, 4), 10);
+  const month = parseInt(item.fecha.substring(5, 7), 10);
+
+  const produccion = parseNum(item.produccion_acueducto);
+  const consumo = parseNum(item.consumo_acueducto);
+
+  // Calcular IANC Mensual
+  let iancMensual = null;
+  if (produccion !== null && consumo !== null && produccion > 0) {
+    iancMensual = ((produccion - consumo) / produccion) * 100;
+  }
+
+  return {
+    year,
+    month,
+    // Acueducto
+    coberturaAcueducto: parsePercent(item.cobertura_acueducto),
+    usuariosAcueducto: parseNum(item.usuarios_acueducto),
+    micromedicionNominal: parsePercent(item.micromedicion_nominal),
+    micromedicionReal: parsePercent(item.micromedicion_real),
+    irca: parsePercent(item.irca),
+    iancMensual: iancMensual,
+    iancAcumuladoExcel: parsePercent(item.ianc_promedio),
+    produccion: produccion,
+    consumo: consumo,
+    continuidad: parseNum(item.continuidad_acueducto),
+    // Alcantarillado
+    coberturaAlcantarillado: parsePercent(item.cobertura_alcantarillado),
+    usuariosAlcantarillado: parseNum(item.usuarios_alcantarillado),
+    // Aseo
+    coberturaAseo: parsePercent(item.cobertura_aseo),
+    usuariosAseo: parseNum(item.usuarios_aseo),
+    barrido: parseNum(item.barrido_km),
+    continuidadAseo: parsePercent(item.continuidad_aseo),
+    produccionResiduos: parseNum(item.produccion_residuos_ton),
+  };
+}

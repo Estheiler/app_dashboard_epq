@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useExcelData } from './hooks/useExcelData';
 import { filterByYear, filterData, getLastNMonths } from './utils/dataParser';
 import Header from './components/Header';
@@ -8,8 +8,28 @@ import AcueductoSection from './components/AcueductoSection';
 import AlcantarilladoSection from './components/AlcantarilladoSection';
 import AseoSection from './components/AseoSection';
 import Footer from './components/Footer';
+import Login from './components/Login';
 
 function App() {
+  const [token, setToken] = useState(localStorage.getItem('epq_token'));
+  const [username, setUsername] = useState(localStorage.getItem('epq_username'));
+  const [role, setRole] = useState(localStorage.getItem('epq_role'));
+
+  const handleLoginSuccess = (newToken, user) => {
+    setToken(newToken);
+    setUsername(user.username);
+    setRole(user.role);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('epq_token');
+    localStorage.removeItem('epq_username');
+    localStorage.removeItem('epq_role');
+    setToken(null);
+    setUsername(null);
+    setRole(null);
+  };
+
   const {
     data,
     loading,
@@ -21,7 +41,11 @@ function App() {
     changeYear,
     changeMonth,
     refreshData,
-  } = useExcelData();
+  } = useExcelData(token, handleLogout);
+
+  if (!token) {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
 
   if (loading) {
     return (
@@ -53,6 +77,9 @@ function App() {
         onYearChange={changeYear}
         onMonthChange={changeMonth}
         onRefresh={refreshData}
+        username={username}
+        role={role}
+        onLogout={handleLogout}
       />
 
       <div className="top-charts-grid">

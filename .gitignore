@@ -26,3 +26,5 @@ dist-ssr
 # Project specific
 .gemini
 debug_excel.js
+
+README_API.md
