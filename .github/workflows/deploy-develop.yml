@@ -1,0 +1,44 @@
+name: Deploy to Staging (Develop)
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descarga el código del repositorio
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Configura el entorno de Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 3. Instala las dependencias
+      - name: Install Dependencies
+        run: npm install
+
+      # 4. Construye el proyecto en modo desarrollo (carga .env.development)
+      - name: Build Project for Staging
+        run: npm run build -- --mode development
+
+      # 5. Sube la carpeta dist al servidor FTP de pruebas
+      - name: Sync files via FTP to Staging
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_DEVELOP_SERVER }}
+          username: ${{ secrets.FTP_DEVELOP_USERNAME }}
+          password: ${{ secrets.FTP_DEVELOP_PASSWORD }}
+          port: 21
+          protocol: ftps
+          security: loose
+          # Subimos el contenido de la carpeta dist compilada
+          local-dir: ./dist/
+          # Directorio de destino en el servidor de desarrollo (usualmente un subdirectorio como './staging/')
+          server-dir: ${{ secrets.FTP_DEVELOP_SERVER_DIR || './staging/' }}
