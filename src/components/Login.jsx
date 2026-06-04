@@ -40,7 +40,7 @@ function Login({ onLoginSuccess }) {
       if (result.success && result.data?.access_token) {
         const token = result.data.access_token;
         const user = result.data.user;
-        
+
         // Guardar en localStorage
         localStorage.setItem('epq_token', token);
         localStorage.setItem('epq_username', user.username);
@@ -130,7 +130,7 @@ function Login({ onLoginSuccess }) {
         </form>
 
         <div className="login-footer">
-          Empresas Públicas del Quindío S.A. E.S.P.
+          Empresas Públicas de Quibdó E.S.P. en Liquidación
         </div>
       </div>
     </div>
