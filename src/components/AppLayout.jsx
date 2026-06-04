@@ -5,6 +5,7 @@ import Footer from './Footer';
 import Home from './Home';
 import IndicatorsDashboard from './IndicatorsDashboard';
 import ModulePlaceholder from './ModulePlaceholder';
+import UserManagement from './UserManagement';
 
 function AppLayout({ token, username, role, onLogout }) {
   const [activeView, setActiveView] = useState('home');
@@ -43,17 +44,11 @@ function AppLayout({ token, username, role, onLogout }) {
         );
       case 'users':
         return (
-          <ModulePlaceholder
-            moduleName="Gestión de Usuarios"
-            description="Módulo de control de acceso para crear, activar, desactivar y gestionar permisos de operarios y administradores."
-            icon={
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-              </svg>
-            }
+          <UserManagement
+            token={token}
+            currentUsername={username}
+            currentRole={role}
+            onUnauthorized={onLogout}
           />
         );
       case 'audit':
