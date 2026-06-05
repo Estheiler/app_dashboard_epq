@@ -36,8 +36,6 @@ jobs:
           username: ${{ secrets.FTP_DEVELOP_USERNAME || secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_DEVELOP_PASSWORD || secrets.FTP_PASSWORD }}
           port: 21
-          protocol: ftps
-          security: loose
           # Subimos el contenido de la carpeta dist compilada
           local-dir: ./dist/
           # Directorio de destino en el servidor de desarrollo (usualmente un subdirectorio como './staging/')
