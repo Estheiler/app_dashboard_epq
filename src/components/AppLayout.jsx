@@ -6,6 +6,7 @@ import Home from './Home';
 import IndicatorsDashboard from './IndicatorsDashboard';
 import ModulePlaceholder from './ModulePlaceholder';
 import UserManagement from './UserManagement';
+import MacromedicionMiaPage from './MacromedicionMiaPage';
 
 function AppLayout({ token, username, role, onLogout }) {
   const [activeView, setActiveView] = useState('home');
@@ -31,15 +32,11 @@ function AppLayout({ token, username, role, onLogout }) {
         );
       case 'macromedidor':
         return (
-          <ModulePlaceholder
-            moduleName="Macromedidor Ciudadela MIA"
-            description="Registro operativo de lecturas por hora de macromedidores y análisis acumulado diario para la Ciudadela MIA."
-            icon={
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M12 6v6l4 2"></path>
-              </svg>
-            }
+          <MacromedicionMiaPage
+            token={token}
+            currentUsername={username}
+            currentRole={role}
+            onUnauthorized={onLogout}
           />
         );
       case 'users':
