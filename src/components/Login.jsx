@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function Login({ onLoginSuccess }) {
+function Login({ onLoginSuccess, onBack }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -117,16 +117,21 @@ function Login({ onLoginSuccess }) {
             </div>
           </div>
 
-          <button type="submit" className="login-button" disabled={loading}>
-            {loading ? (
-              <span className="login-spinner-container">
-                <span className="login-spinner"></span>
-                Iniciando sesión...
-              </span>
-            ) : (
-              'Iniciar Sesión'
-            )}
-          </button>
+          <div className="login-buttons-group">
+            <button type="submit" className="login-button" disabled={loading}>
+              {loading ? (
+                <span className="login-spinner-container">
+                  <span className="login-spinner"></span>
+                  Iniciando sesión...
+                </span>
+              ) : (
+                'Iniciar Sesión'
+              )}
+            </button>
+            <button type="button" className="login-back-button" onClick={onBack} disabled={loading}>
+              Volver
+            </button>
+          </div>
         </form>
 
         <div className="login-footer">
