@@ -32,9 +32,9 @@ jobs:
       - name: Sync files via FTP to Staging
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ${{ secrets.FTP_DEVELOP_SERVER }}
-          username: ${{ secrets.FTP_DEVELOP_USERNAME }}
-          password: ${{ secrets.FTP_DEVELOP_PASSWORD }}
+          server: ${{ secrets.FTP_DEVELOP_SERVER || secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_DEVELOP_USERNAME || secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_DEVELOP_PASSWORD || secrets.FTP_PASSWORD }}
           port: 21
           protocol: ftps
           security: loose
