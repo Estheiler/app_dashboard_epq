@@ -55,14 +55,6 @@ function MacromedicionMiaPage({ token, currentUsername, currentRole, currentUser
         const result = await response.json();
         let records = result.data || [];
 
-        // Filtro de seguridad adicional para OPERARIO
-        if (isOperario) {
-          records = records.filter(r => 
-            String(r.operario_id) === String(currentUserId) || 
-            String(r.createdBy) === String(currentUserId)
-          );
-        }
-
         if (records.length === 0) {
           setAvailableDates([]);
           setAvailableYears([new Date().getFullYear()]);
@@ -144,13 +136,7 @@ function MacromedicionMiaPage({ token, currentUsername, currentRole, currentUser
     setFilters(newFilters);
   };
 
-  // Filtrar data para el operario (salvaguarda de seguridad en frontend)
-  const displayData = isOperario
-    ? filteredData.filter(r => 
-        String(r.operario_id) === String(currentUserId) || 
-        String(r.createdBy) === String(currentUserId)
-      )
-    : filteredData;
+  const displayData = filteredData;
 
   // Renderizar la vista correspondiente
   if (subView === 'registro') {
