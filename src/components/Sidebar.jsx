@@ -33,7 +33,7 @@ function Sidebar({ role, activeView, setActiveView, expanded }) {
           <line x1="6" y1="20" x2="6" y2="14"></line>
         </svg>
       ),
-      roles: ['superadmin', 'admin', 'hidraulico'],
+      roles: ['superadmin', 'admin', 'hidraulico', 'operario'],
     },
     {
       id: 'macromedidor',
@@ -44,8 +44,7 @@ function Sidebar({ role, activeView, setActiveView, expanded }) {
           <path d="M12 6v6l4 2"></path>
         </svg>
       ),
-      roles: ['superadmin', 'operario'],
-      isFuture: true,
+      roles: ['superadmin', 'admin', 'hidraulico', 'operario'],
     },
     {
       id: 'users',

@@ -8,7 +8,7 @@ import ModulePlaceholder from './ModulePlaceholder';
 import UserManagement from './UserManagement';
 import MacromedicionMiaPage from './MacromedicionMiaPage';
 
-function AppLayout({ token, username, role, onLogout }) {
+function AppLayout({ token, username, role, userId, onLogout }) {
   const [activeView, setActiveView] = useState('home');
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
@@ -36,6 +36,7 @@ function AppLayout({ token, username, role, onLogout }) {
             token={token}
             currentUsername={username}
             currentRole={role}
+            currentUserId={userId}
             onUnauthorized={onLogout}
           />
         );

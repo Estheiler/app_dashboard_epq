@@ -45,6 +45,7 @@ function Login({ onLoginSuccess, onBack }) {
         localStorage.setItem('epq_token', token);
         localStorage.setItem('epq_username', user.username);
         localStorage.setItem('epq_role', user.role);
+        localStorage.setItem('epq_user_id', user.id);
 
         // Notificar al componente padre
         onLoginSuccess(token, user);

@@ -23,7 +23,7 @@ function Home({ username, role, setActiveView }) {
           <line x1="6" y1="20" x2="6" y2="14"></line>
         </svg>
       ),
-      roles: ['superadmin', 'admin', 'hidraulico'],
+      roles: ['superadmin', 'admin', 'hidraulico', 'operario'],
       isFuture: false,
     },
     {
@@ -36,8 +36,8 @@ function Home({ username, role, setActiveView }) {
           <path d="M12 6v6l4 2"></path>
         </svg>
       ),
-      roles: ['superadmin', 'operario'],
-      isFuture: true,
+      roles: ['superadmin', 'admin', 'hidraulico', 'operario'],
+      isFuture: false,
     },
     {
       id: 'users',

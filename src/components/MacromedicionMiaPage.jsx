@@ -6,8 +6,11 @@ import AccumulatedConsumptionChart from './AccumulatedConsumptionChart';
 import DailyComparisonChart from './DailyComparisonChart';
 import HydraulicInsights from './HydraulicInsights';
 import MacromedicionTable from './MacromedicionTable';
+import RegistroLecturaPage from './RegistroLecturaPage';
 
-function MacromedicionMiaPage({ token, currentUsername, currentRole, onUnauthorized }) {
+function MacromedicionMiaPage({ token, currentUsername, currentRole, currentUserId, onUnauthorized }) {
+  const [subView, setSubView] = useState('menu'); // 'menu', 'registro', 'analisis'
+
   // Metadatos para filtros
   const [availableDates, setAvailableDates] = useState([]);
   const [availableYears, setAvailableYears] = useState([]);
@@ -23,6 +26,7 @@ function MacromedicionMiaPage({ token, currentUsername, currentRole, onUnauthori
   const [filters, setFilters] = useState(null);
 
   const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+  const isOperario = currentRole?.toLowerCase() === 'operario';
 
   // 1. Cargar todos los registros para extraer fechas y años disponibles
   useEffect(() => {
@@ -48,7 +52,15 @@ function MacromedicionMiaPage({ token, currentUsername, currentRole, onUnauthori
         }
 
         const result = await response.json();
-        const records = result.data || [];
+        let records = result.data || [];
+
+        // Filtro de seguridad adicional para OPERARIO
+        if (isOperario) {
+          records = records.filter(r => 
+            String(r.operario_id) === String(currentUserId) || 
+            String(r.createdBy) === String(currentUserId)
+          );
+        }
 
         if (records.length === 0) {
           setAvailableDates([]);
@@ -57,7 +69,7 @@ function MacromedicionMiaPage({ token, currentUsername, currentRole, onUnauthori
           return;
         }
 
-        // Extraer fechas únicas y ordenarlas descendente (más recientes primero)
+        // Extraer fechas únicas y ordenarlas descendente
         const dates = [...new Set(records.map(r => r.fecha))].sort((a, b) => new Date(b) - new Date(a));
         setAvailableDates(dates);
 
@@ -72,8 +84,10 @@ function MacromedicionMiaPage({ token, currentUsername, currentRole, onUnauthori
       }
     }
 
-    fetchMetadata();
-  }, [token]);
+    if (token) {
+      fetchMetadata();
+    }
+  }, [token, subView]); // Recargar metadatos si cambia de vista para actualizar fechas registradas
 
   // 2. Fetch de datos filtrados basado en el filtro activo
   useEffect(() => {
@@ -129,17 +143,130 @@ function MacromedicionMiaPage({ token, currentUsername, currentRole, onUnauthori
     setFilters(newFilters);
   };
 
-  // Verificar si es perfil Operario para restringir visualmente el análisis hidráulico
-  const isOperario = currentRole?.toLowerCase() === 'operario';
+  // Filtrar data para el operario (salvaguarda de seguridad en frontend)
+  const displayData = isOperario
+    ? filteredData.filter(r => 
+        String(r.operario_id) === String(currentUserId) || 
+        String(r.createdBy) === String(currentUserId)
+      )
+    : filteredData;
 
+  // Renderizar la vista correspondiente
+  if (subView === 'registro') {
+    return (
+      <RegistroLecturaPage
+        token={token}
+        currentUsername={currentUsername}
+        currentRole={currentRole}
+        currentUserId={currentUserId}
+        onBack={() => setSubView('menu')}
+      />
+    );
+  }
+
+  if (subView === 'analisis') {
+    return (
+      <div className="macromedicion-page-wrapper">
+        {/* Cabecera del Módulo */}
+        <div className="module-inner-header">
+          <div className="module-header-info">
+            <div className="back-nav-container" style={{ marginBottom: '10px' }}>
+              <button className="back-link-btn" onClick={() => setSubView('menu')}>
+                &larr; Volver al menú de Macromedición
+              </button>
+            </div>
+            <h2 className="module-inner-title">Análisis de Macromedición</h2>
+            <p className="module-inner-description">
+              Monitoreo hidráulico de caudales, patrones de consumo y diagnóstico de pérdidas
+            </p>
+          </div>
+          <div className="module-header-actions">
+            <span className="location-badge">📍 Ciudadela MIA</span>
+          </div>
+        </div>
+
+        {metadataLoading ? (
+          <div className="module-loading-screen">
+            <div className="loading-spinner"></div>
+            <div className="loading-text">Cargando fechas y configuración del macromedidor...</div>
+          </div>
+        ) : metadataError ? (
+          <div className="module-error-screen">
+            <div className="error-icon">⚠️</div>
+            <div className="error-text">No se pudo inicializar el módulo: {metadataError}</div>
+          </div>
+        ) : availableDates.length === 0 ? (
+          <div className="module-error-screen">
+            <div className="error-icon">ℹ️</div>
+            <div className="error-text">No existen lecturas registradas en la base de datos de macromedición.</div>
+          </div>
+        ) : (
+          <>
+            {/* Panel de Filtros */}
+            <MacromedicionFilters
+              availableDates={availableDates}
+              availableYears={availableYears}
+              onFilterChange={handleFilterChange}
+            />
+
+            {dataLoading ? (
+              <div className="module-loading-screen" style={{ minHeight: '300px' }}>
+                <div className="loading-spinner"></div>
+                <div className="loading-text">Actualizando análisis y curvas de consumo...</div>
+              </div>
+            ) : dataError ? (
+              <div className="module-error-screen" style={{ minHeight: '300px' }}>
+                <div className="error-icon">⚠️</div>
+                <div className="error-text">{dataError}</div>
+              </div>
+            ) : (
+              <div className="macromedicion-results-container">
+                {/* Tarjetas KPI */}
+                <MacromedicionKpis data={displayData} />
+
+                {/* Gráficos de Curva Horaria y Acumulado */}
+                <div className="top-charts-grid">
+                  <HourlyConsumptionChart
+                    data={displayData}
+                    isSingleDay={filters?.type === 'day'}
+                  />
+                  <AccumulatedConsumptionChart
+                    data={displayData}
+                    isSingleDay={filters?.type === 'day'}
+                  />
+                </div>
+
+                {/* Gráfico Comparativo de Días */}
+                {displayData.length > 0 && (
+                  <DailyComparisonChart
+                    data={displayData}
+                    filterType={filters?.type}
+                  />
+                )}
+
+                {/* Sección de Análisis Hidráulico y Alertas (Oculto para Operarios) */}
+                {!isOperario && (
+                  <HydraulicInsights data={displayData} />
+                )}
+
+                {/* Tabla Detallada */}
+                <MacromedicionTable data={displayData} />
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // subView === 'menu' (Vista intermedia)
   return (
     <div className="macromedicion-page-wrapper">
-      {/* Cabecera del Módulo */}
       <div className="module-inner-header">
         <div className="module-header-info">
-          <h2 className="module-inner-title">Macromedición - Ciudadela MIA</h2>
+          <h2 className="module-inner-title">Módulo de Macromedición</h2>
           <p className="module-inner-description">
-            Monitoreo hidráulico de caudales, patrones de consumo y diagnóstico de pérdidas
+            Control de macromedición, registro de lecturas por hora y análisis hidráulico en Ciudadela MIA.
           </p>
         </div>
         <div className="module-header-actions">
@@ -147,76 +274,44 @@ function MacromedicionMiaPage({ token, currentUsername, currentRole, onUnauthori
         </div>
       </div>
 
-      {metadataLoading ? (
-        <div className="module-loading-screen">
-          <div className="loading-spinner"></div>
-          <div className="loading-text">Cargando fechas y configuración del macromedidor...</div>
-        </div>
-      ) : metadataError ? (
-        <div className="module-error-screen">
-          <div className="error-icon">⚠️</div>
-          <div className="error-text">No se pudo inicializar el módulo: {metadataError}</div>
-        </div>
-      ) : availableDates.length === 0 ? (
-        <div className="module-error-screen">
-          <div className="error-icon">ℹ️</div>
-          <div className="error-text">No existen lecturas registradas en la base de datos de macromedición.</div>
-        </div>
-      ) : (
-        <>
-          {/* Panel de Filtros */}
-          <MacromedicionFilters
-            availableDates={availableDates}
-            availableYears={availableYears}
-            onFilterChange={handleFilterChange}
-          />
-
-          {dataLoading ? (
-            <div className="module-loading-screen" style={{ minHeight: '300px' }}>
-              <div className="loading-spinner"></div>
-              <div className="loading-text">Actualizando análisis y curvas de consumo...</div>
+      <div className="macromedicion-subview-menu">
+        <div className="subview-menu-card" onClick={() => setSubView('registro')}>
+          <div className="subview-card-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"></path>
+            </svg>
+          </div>
+          <div className="subview-card-body">
+            <h3 className="subview-card-title">Registro de lectura</h3>
+            <p className="subview-card-desc">
+              Ingresa lecturas hora a hora del macromedidor de la ciudadela. Registro de valores en m³, observaciones y control de horarios para el operario de planta.
+            </p>
+            <div className="subview-card-action">
+              <span>Ingresar al Registro &rarr;</span>
             </div>
-          ) : dataError ? (
-            <div className="module-error-screen" style={{ minHeight: '300px' }}>
-              <div className="error-icon">⚠️</div>
-              <div className="error-text">{dataError}</div>
+          </div>
+        </div>
+
+        <div className="subview-menu-card" onClick={() => setSubView('analisis')}>
+          <div className="subview-card-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </div>
+          <div className="subview-card-body">
+            <h3 className="subview-card-title">Análisis de lectura</h3>
+            <p className="subview-card-desc">
+              Visualiza curvas de consumo horarias, consumos acumulados diarios, diagnósticos de fugas y flujo mínimo nocturno.
+            </p>
+            <div className="subview-card-action">
+              <span>Ver Análisis &rarr;</span>
             </div>
-          ) : (
-            <div className="macromedicion-results-container">
-              {/* Tarjetas KPI */}
-              <MacromedicionKpis data={filteredData} />
-
-              {/* Gráficos de Curva Horaria y Acumulado */}
-              <div className="top-charts-grid">
-                <HourlyConsumptionChart
-                  data={filteredData}
-                  isSingleDay={filters?.type === 'day'}
-                />
-                <AccumulatedConsumptionChart
-                  data={filteredData}
-                  isSingleDay={filters?.type === 'day'}
-                />
-              </div>
-
-              {/* Gráfico Comparativo de Días (Solo se renderiza si hay múltiples días) */}
-              {filteredData.length > 0 && (
-                <DailyComparisonChart
-                  data={filteredData}
-                  filterType={filters?.type}
-                />
-              )}
-
-              {/* Sección de Análisis Hidráulico y Alertas (Oculto para Operarios) */}
-              {!isOperario && (
-                <HydraulicInsights data={filteredData} />
-              )}
-
-              {/* Tabla Detallada */}
-              <MacromedicionTable data={filteredData} />
-            </div>
-          )}
-        </>
-      )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -8,6 +8,7 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem('epq_token'));
   const [username, setUsername] = useState(localStorage.getItem('epq_username'));
   const [role, setRole] = useState(localStorage.getItem('epq_role'));
+  const [userId, setUserId] = useState(localStorage.getItem('epq_user_id'));
   const [currentScreen, setCurrentScreen] = useState(
     localStorage.getItem('epq_token') ? 'portal' : 'public-indicators'
   );
@@ -16,6 +17,7 @@ function App() {
     setToken(newToken);
     setUsername(user.username);
     setRole(user.role);
+    setUserId(user.id);
     setCurrentScreen('portal');
   };
 
@@ -23,9 +25,11 @@ function App() {
     localStorage.removeItem('epq_token');
     localStorage.removeItem('epq_username');
     localStorage.removeItem('epq_role');
+    localStorage.removeItem('epq_user_id');
     setToken(null);
     setUsername(null);
     setRole(null);
+    setUserId(null);
     setCurrentScreen('public-indicators');
   };
 
@@ -62,6 +66,7 @@ function App() {
       token={token}
       username={username}
       role={role}
+      userId={userId}
       onLogout={handleLogout}
     />
   );
