@@ -9,7 +9,8 @@ import MacromedicionTable from './MacromedicionTable';
 import RegistroLecturaPage from './RegistroLecturaPage';
 
 function MacromedicionMiaPage({ token, currentUsername, currentRole, currentUserId, onUnauthorized }) {
-  const [subView, setSubView] = useState('menu'); // 'menu', 'registro', 'analisis'
+  const isHidraulico = currentRole?.toLowerCase() === 'hidraulico';
+  const [subView, setSubView] = useState(isHidraulico ? 'analisis' : 'menu'); // 'menu', 'registro', 'analisis'
 
   // Metadatos para filtros
   const [availableDates, setAvailableDates] = useState([]);
@@ -170,11 +171,13 @@ function MacromedicionMiaPage({ token, currentUsername, currentRole, currentUser
         {/* Cabecera del Módulo */}
         <div className="module-inner-header">
           <div className="module-header-info">
-            <div className="back-nav-container" style={{ marginBottom: '10px' }}>
-              <button className="back-link-btn" onClick={() => setSubView('menu')}>
-                &larr; Volver al menú de Macromedición
-              </button>
-            </div>
+            {!isHidraulico && (
+              <div className="back-nav-container" style={{ marginBottom: '10px' }}>
+                <button className="back-link-btn" onClick={() => setSubView('menu')}>
+                  &larr; Volver al menú de Macromedición
+                </button>
+              </div>
+            )}
             <h2 className="module-inner-title">Análisis de Macromedición</h2>
             <p className="module-inner-description">
               Monitoreo hidráulico de caudales, patrones de consumo y diagnóstico de pérdidas
