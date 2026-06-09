@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Topbar({ username, role, onLogout, sidebarExpanded, setSidebarExpanded }) {
+function Topbar({ username, role, onLogout }) {
   // Traducir roles para mostrarlos de manera amigable
   const getRoleLabel = (r) => {
     if (!r) return 'Usuario';
@@ -15,18 +15,6 @@ function Topbar({ username, role, onLogout, sidebarExpanded, setSidebarExpanded 
   return (
     <header className="topbar">
       <div className="topbar-left">
-        <button
-          className="sidebar-toggle"
-          onClick={() => setSidebarExpanded(!sidebarExpanded)}
-          aria-label={sidebarExpanded ? 'Contraer menú' : 'Expandir menú'}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
-
         <div className="topbar-brand">
           <img src="/logo_epq_horizontal.png" alt="EPQ" className="topbar-logo" />
           <span className="topbar-title-desktop">Plataforma de Gestión Operativa</span>

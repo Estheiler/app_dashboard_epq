@@ -52,7 +52,6 @@ function Home({ username, role, setActiveView }) {
         </svg>
       ),
       roles: ['superadmin', 'admin'],
-      isFuture: true,
     },
     {
       id: 'audit',
@@ -67,22 +66,7 @@ function Home({ username, role, setActiveView }) {
         </svg>
       ),
       roles: ['superadmin', 'admin'],
-      isFuture: true,
     },
-    {
-      id: 'reports',
-      label: 'Reportes y Descargas',
-      description: 'Exportación avanzada de bases de datos operativas e indicadores a archivos Excel con filtros por rango de fechas.',
-      icon: (
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7 10 12 15 17 10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
-        </svg>
-      ),
-      roles: ['superadmin', 'admin', 'hidraulico'],
-      isFuture: true,
-    }
   ];
 
   const hasAccess = (item) => {
@@ -98,7 +82,7 @@ function Home({ username, role, setActiveView }) {
       <div className="home-welcome-card">
         <h1 className="home-welcome-title">¡Hola, {username}!</h1>
         <p className="home-welcome-subtitle">
-          Bienvenido al Portal de Gestión Operativa de EPQ S.A. E.S.P. Has ingresado con el perfil de <strong>{getRoleLabel(role)}</strong>.
+          Bienvenido al Portal de Gestión Operativa de EPQ E.S.P. en Liquidación. Has ingresado con el rol de <strong>{getRoleLabel(role)}</strong>.
         </p>
       </div>
 

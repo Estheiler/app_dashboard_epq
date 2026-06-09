@@ -1,6 +1,7 @@
 import React from 'react';
+import './Sidebar.css';
 
-function Sidebar({ role, activeView, setActiveView, expanded }) {
+function Sidebar({ role, activeView, setActiveView, expanded, setSidebarExpanded }) {
   const getRoleLabel = (r) => {
     if (!r) return '';
     const upper = r.toUpperCase();
@@ -58,7 +59,6 @@ function Sidebar({ role, activeView, setActiveView, expanded }) {
         </svg>
       ),
       roles: ['superadmin', 'admin'],
-      isFuture: true,
     },
     {
       id: 'audit',
@@ -72,20 +72,6 @@ function Sidebar({ role, activeView, setActiveView, expanded }) {
         </svg>
       ),
       roles: ['superadmin', 'admin'],
-      isFuture: true,
-    },
-    {
-      id: 'reports',
-      label: 'Reportes y Descargas',
-      icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7 10 12 15 17 10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
-        </svg>
-      ),
-      roles: ['superadmin', 'admin', 'hidraulico'],
-      isFuture: true,
     }
   ];
 
@@ -100,14 +86,37 @@ function Sidebar({ role, activeView, setActiveView, expanded }) {
   return (
     <aside className={`sidebar ${expanded ? 'expanded' : 'collapsed'}`}>
       <div className="sidebar-header">
-        <div className="logo-box">
-          <img src="/logo_epq.png" alt="EPQ" className="sidebar-logo" />
-        </div>
-        {expanded && (
-          <div className="brand-text">
-            <span className="brand-title">Portal EPQ</span>
-            <span className="brand-badge">{getRoleLabel(role)}</span>
-          </div>
+        {expanded ? (
+          <>
+            <div className="logo-box">
+              <img src="/logo_epq.png" alt="EPQ" className="sidebar-logo" />
+            </div>
+            <div className="brand-text">
+              <span className="brand-title">Portal EPQ</span>
+              <span className="brand-badge">{getRoleLabel(role)}</span>
+            </div>
+            <button
+              className="sidebar-toggle-in"
+              onClick={() => setSidebarExpanded(false)}
+              aria-label="Contraer menú"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+          </>
+        ) : (
+          <button
+            className="sidebar-toggle-in collapsed-toggle"
+            onClick={() => setSidebarExpanded(true)}
+            aria-label="Expandir menú"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
         )}
       </div>
 

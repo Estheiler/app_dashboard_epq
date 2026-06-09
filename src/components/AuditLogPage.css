@@ -1,0 +1,244 @@
+/* ==========================================================================
+   Audit Log Module Styles
+   ========================================================================== */
+
+.audit-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.audit-tabs-container {
+  display: flex;
+  gap: 12px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 2px;
+  margin-bottom: 8px;
+}
+
+.audit-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.audit-tab-btn:hover {
+  color: var(--blue);
+  background-color: var(--blue-light);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.audit-tab-btn.active {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+}
+
+.audit-tab-btn .tab-icon {
+  flex-shrink: 0;
+}
+
+.audit-filters-bar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  background: var(--card-bg);
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.search-input-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+}
+
+.search-input-container .search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.search-input-container input {
+  width: 100%;
+  padding: 10px 12px 10px 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: var(--font);
+  color: var(--text-primary);
+  background-color: #FAFBFD;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input-container input:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-area);
+  background-color: #FFFFFF;
+}
+
+.filter-select-container {
+  min-width: 200px;
+}
+
+.audit-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: var(--font);
+  color: var(--text-primary);
+  background-color: #FAFBFD;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.audit-select:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-area);
+  background-color: #FFFFFF;
+}
+
+.audit-table-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.audit-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.audit-table th {
+  background-color: #F8FAFC;
+  color: var(--teal);
+  font-weight: 700;
+  padding: 14px 16px;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+
+.audit-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.audit-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.audit-table tbody tr:hover {
+  background-color: #F8FAFC;
+}
+
+.td-date {
+  font-family: monospace;
+  white-space: nowrap;
+  color: var(--text-label);
+}
+
+.td-bold {
+  font-weight: 600;
+}
+
+.td-ip {
+  font-family: monospace;
+  color: var(--text-label);
+}
+
+.td-ua {
+  color: var(--text-secondary);
+}
+
+.td-details {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.td-details:hover {
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Badges for Audit Logs */
+.badge-audit {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.badge-audit.success {
+  background-color: var(--green-area);
+  color: var(--green-dark);
+  border: 1px solid rgba(127, 211, 73, 0.3);
+}
+
+.badge-audit.danger {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #DC3545;
+  border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+.badge-audit.warning {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: #D39E00;
+  border: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+.badge-audit.info {
+  background-color: var(--blue-light);
+  color: var(--blue-dark);
+  border: 1px solid rgba(0, 157, 208, 0.2);
+}
+
+/* Responsividad para Auditoria */
+@media (max-width: 768px) {
+  .audit-filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .search-input-container {
+    min-width: 100%;
+  }
+  .filter-select-container {
+    min-width: 100%;
+  }
+}

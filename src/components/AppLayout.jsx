@@ -7,6 +7,7 @@ import IndicatorsDashboard from './IndicatorsDashboard';
 import ModulePlaceholder from './ModulePlaceholder';
 import UserManagement from './UserManagement';
 import MacromedicionMiaPage from './MacromedicionMiaPage';
+import AuditLogPage from './AuditLogPage';
 
 function AppLayout({ token, username, role, userId, onLogout }) {
   const [activeView, setActiveView] = useState('home');
@@ -51,31 +52,11 @@ function AppLayout({ token, username, role, userId, onLogout }) {
         );
       case 'audit':
         return (
-          <ModulePlaceholder
-            moduleName="Auditoría del Sistema"
-            description="Bitácora de seguridad histórica para auditar los inicios de sesión y modificaciones de registros en el sistema."
-            icon={
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-            }
-          />
-        );
-      case 'reports':
-        return (
-          <ModulePlaceholder
-            moduleName="Reportes y Descargas"
-            description="Exportador avanzado de base de datos e históricos a formatos binarios Excel (.xlsx) con filtros por fechas."
-            icon={
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-            }
+          <AuditLogPage
+            token={token}
+            currentUsername={username}
+            currentRole={role}
+            onUnauthorized={onLogout}
           />
         );
       default:
@@ -91,6 +72,7 @@ function AppLayout({ token, username, role, userId, onLogout }) {
         activeView={activeView}
         setActiveView={setActiveView}
         expanded={sidebarExpanded}
+        setSidebarExpanded={setSidebarExpanded}
       />
 
       {/* Área Principal de la Aplicación */}
@@ -100,8 +82,6 @@ function AppLayout({ token, username, role, userId, onLogout }) {
           username={username}
           role={role}
           onLogout={onLogout}
-          sidebarExpanded={sidebarExpanded}
-          setSidebarExpanded={setSidebarExpanded}
         />
 
         {/* Panel Central de Contenido Dinámico */}

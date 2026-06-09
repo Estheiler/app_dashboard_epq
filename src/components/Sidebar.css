@@ -1,0 +1,30 @@
+/* Sidebar Header Toggle Buttons */
+.sidebar-toggle-in {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: var(--radius-xs);
+  transition: all 0.2s ease;
+  margin-left: auto;
+}
+
+.sidebar-toggle-in:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+}
+
+.sidebar-toggle-in.collapsed-toggle {
+  margin: 0 auto;
+  width: 38px;
+  height: 38px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.sidebar-toggle-in.collapsed-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
