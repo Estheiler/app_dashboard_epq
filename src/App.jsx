@@ -8,7 +8,24 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem('epq_token'));
   const [username, setUsername] = useState(localStorage.getItem('epq_username'));
   const [role, setRole] = useState(localStorage.getItem('epq_role'));
-  const [userId, setUserId] = useState(localStorage.getItem('epq_user_id'));
+  const [userId, setUserId] = useState(() => {
+    const stored = localStorage.getItem('epq_user_id');
+    if (stored) return stored;
+    const t = localStorage.getItem('epq_token');
+    if (t) {
+      try {
+        const payload = JSON.parse(atob(t.split('.')[1]));
+        const id = payload.id || payload.sub;
+        if (id) {
+          localStorage.setItem('epq_user_id', id);
+          return id;
+        }
+      } catch (e) {
+        console.error('Error decodificando token en inicio:', e);
+      }
+    }
+    return null;
+  });
   const [currentScreen, setCurrentScreen] = useState(
     localStorage.getItem('epq_token') ? 'portal' : 'public-indicators'
   );

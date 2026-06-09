@@ -69,7 +69,6 @@ function MacromedicionTable({ data }) {
               <th>Hora</th>
               <th>Lectura (m³)</th>
               <th>Consumo (m³/h)</th>
-              <th>Acumulado Día (m³)</th>
               <th>Observaciones</th>
               <th>Fecha Registro</th>
             </tr>
@@ -78,7 +77,6 @@ function MacromedicionTable({ data }) {
             {currentRows.map((row) => {
               const lectura = parseFloat(row.lectura_m3) || parseFloat(row.lectura) || 0;
               const consumo = parseFloat(row.consolidado_m3) || parseFloat(row.consolidado) || 0;
-              const acumulado = parseFloat(row.consumo_acumulado_dia) || parseFloat(row.acumulado) || 0;
 
               return (
                 <tr key={row.id}>
@@ -86,7 +84,6 @@ function MacromedicionTable({ data }) {
                   <td>{`${row.hora.toString().padStart(2, '0')}:00`}</td>
                   <td>{formatNumber(lectura)}</td>
                   <td className="td-bold text-primary">{formatNumber(consumo)}</td>
-                  <td>{formatNumber(acumulado)}</td>
                   <td className="td-italic">{row.observaciones || 'Sin observaciones'}</td>
                   <td className="td-date">{formatDateTime(row.created_at)}</td>
                 </tr>

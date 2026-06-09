@@ -230,7 +230,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
                 onChange={(e) => setLecturaM3(e.target.value)}
                 required
                 disabled={loading}
-                placeholder="Ingresa la lectura acumulada en m³"
+                placeholder="Ingresa la lectura del macromedidor en m³"
               />
               <span className="input-helper">Ej: 12450.80</span>
             </div>
@@ -286,14 +286,12 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
                     <th>Hora</th>
                     <th>Lectura</th>
                     <th>Consumo</th>
-                    <th>Acum. Día</th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentReadings.map((row) => {
                     const lectura = parseFloat(row.lectura_m3) || parseFloat(row.lectura) || 0;
                     const consumo = parseFloat(row.consolidado_m3) || parseFloat(row.consolidado) || 0;
-                    const acumulado = parseFloat(row.consumo_acumulado_dia) || parseFloat(row.acumulado) || 0;
 
                     return (
                       <tr key={row.id}>
@@ -301,7 +299,6 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
                         <td className="td-bold">{`${row.hora.toString().padStart(2, '0')}:00`}</td>
                         <td>{formatNumber(lectura)}</td>
                         <td className="text-primary font-bold">{formatNumber(consumo)}</td>
-                        <td>{formatNumber(acumulado)}</td>
                       </tr>
                     );
                   })}
@@ -311,7 +308,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
           </div>
           <div className="history-card-footer">
             <p className="helper-text">
-              * El consumo y el acumulado diario son calculados automáticamente por el backend.
+              * El consumo (m³/h) es calculado automáticamente por el backend.
             </p>
           </div>
         </div>
