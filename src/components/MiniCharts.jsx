@@ -10,6 +10,21 @@ export const IancAcumuladoChart = ({ chartData }) => {
     value: d.iancAcumuladoExcel !== undefined && d.iancAcumuladoExcel !== null ? d.iancAcumuladoExcel : null,
   }));
 
+  // Calcular el rango dinámico del eje Y
+  const validValues = data.filter(d => d.value !== null).map(d => d.value);
+  let yMin = 0;
+  let yMax = 100;
+  
+  if (validValues.length > 0) {
+    const minVal = Math.min(...validValues);
+    const maxVal = Math.max(...validValues);
+    const diff = maxVal - minVal;
+    // Margen del 15% de la diferencia o un 1.5% fijo si no hay variación
+    const margin = diff > 0 ? Math.max(0.5, diff * 0.15) : 1.5;
+    yMin = Math.max(0, parseFloat((minVal - margin).toFixed(2)));
+    yMax = parseFloat((maxVal + margin).toFixed(2));
+  }
+
   return (
     <div className="mini-chart-wrap">
       <div className="chart-inner-title">IANC ACUMULADO</div>
@@ -31,7 +46,7 @@ export const IancAcumuladoChart = ({ chartData }) => {
               interval={0}
               padding={{ left: 10, right: 10 }}
             />
-            <YAxis hide domain={[0, 100]} />
+            <YAxis hide domain={[yMin, yMax]} />
             <Tooltip
               contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '10px' }}
               formatter={(val) => [`${val.toFixed(1)}%`, '']}
@@ -44,6 +59,8 @@ export const IancAcumuladoChart = ({ chartData }) => {
               fillOpacity={1}
               fill="url(#colorIanc)"
               connectNulls
+              dot={{ r: 3, stroke: '#009DD0', strokeWidth: 1.5, fill: '#FFFFFF' }}
+              activeDot={{ r: 5, stroke: '#009DD0', strokeWidth: 2, fill: '#FFFFFF' }}
             />
           </AreaChart>
         </ResponsiveContainer>
