@@ -7,6 +7,7 @@ import AcueductoSection from './AcueductoSection';
 import AlcantarilladoSection from './AlcantarilladoSection';
 import AseoSection from './AseoSection';
 import CustomSelect from './CustomSelect';
+import './IndicatorsGrid.css';
 
 function IndicatorsDashboard({ token, onUnauthorized }) {
   const {

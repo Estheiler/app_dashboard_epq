@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import CustomSelect from './CustomSelect';
+import CalendarSelect from './CalendarSelect';
 import { MONTH_NAMES_FULL } from '../utils/dataParser';
 
 function MacromedicionFilters({
@@ -87,8 +88,8 @@ function MacromedicionFilters({
         {filterType === 'day' && (
           <div className="filter-input-group">
             <label>Seleccionar Fecha con Datos</label>
-            <CustomSelect
-              options={dateOptions}
+            <CalendarSelect
+              availableDates={availableDates}
               value={selectedDate}
               onChange={setSelectedDate}
               placeholder="Seleccionar Fecha"
@@ -100,8 +101,8 @@ function MacromedicionFilters({
           <>
             <div className="filter-input-group">
               <label>Desde Fecha</label>
-              <CustomSelect
-                options={dateOptions}
+              <CalendarSelect
+                availableDates={availableDates}
                 value={startDate}
                 onChange={setStartDate}
                 placeholder="Fecha Inicial"
@@ -109,8 +110,8 @@ function MacromedicionFilters({
             </div>
             <div className="filter-input-group">
               <label>Hasta Fecha</label>
-              <CustomSelect
-                options={dateOptions}
+              <CalendarSelect
+                availableDates={availableDates}
                 value={endDate}
                 onChange={setEndDate}
                 placeholder="Fecha Final"

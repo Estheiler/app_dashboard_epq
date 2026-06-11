@@ -27,14 +27,18 @@ const AseoSection = ({ currentData, previousData }) => {
         <h2 className="section-title">Aseo</h2>
       </div>
 
-      <div className="kpi-row kpi-row--2" style={{marginBottom: '20px'}}>
+      <div className="kpi-row kpi-row--3" style={{marginBottom: '20px'}}>
         <div>
           <div className="kpi-label">COBERTURA</div>
-          <div className="kpi-value" style={{fontSize: '18px'}}>{currentData?.coberturaAseo?.toFixed(1) || '--'}%</div>
+          <div className="kpi-value" style={{fontSize: '18px'}}>{currentData?.coberturaAseo !== null && currentData?.coberturaAseo !== undefined ? `${currentData.coberturaAseo.toFixed(1)}%` : '--'}</div>
+        </div>
+        <div style={{textAlign: 'center'}}>
+          <div className="kpi-label">CONTINUIDAD</div>
+          <div className="kpi-value" style={{fontSize: '18px'}}>{currentData?.continuidadAseo !== null && currentData?.continuidadAseo !== undefined ? `${currentData.continuidadAseo}%` : '--'}</div>
         </div>
         <div style={{textAlign: 'right'}}>
-          <div className="kpi-label">CONTINUIDAD</div>
-          <div className="kpi-value" style={{fontSize: '18px'}}>{currentData?.continuidadAseo || '--'}%</div>
+          <div className="kpi-label">USUARIOS</div>
+          <div className="kpi-value" style={{fontSize: '18px'}}>{currentData?.usuariosAseo !== null && currentData?.usuariosAseo !== undefined ? currentData.usuariosAseo.toLocaleString('en-US') : '--'}</div>
         </div>
       </div>
 

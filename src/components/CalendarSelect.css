@@ -1,0 +1,187 @@
+/* ==========================================================================
+   CalendarSelect Component Styles
+   ========================================================================== */
+
+.calendar-select-container {
+  position: relative;
+  width: 100%;
+}
+
+.calendar-trigger-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-family: var(--font);
+  color: var(--text-primary);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.calendar-trigger-btn:hover {
+  border-color: var(--blue);
+  background-color: var(--blue-light);
+}
+
+.calendar-trigger-btn.active {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-area);
+  background-color: #FFFFFF;
+}
+
+.calendar-btn-icon {
+  color: var(--blue);
+  flex-shrink: 0;
+}
+
+.selected-date-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron-icon {
+  color: var(--text-secondary);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.calendar-trigger-btn.active .chevron-icon {
+  transform: rotate(180deg);
+}
+
+/* Calendar Popover */
+.calendar-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 200;
+  width: 280px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 14px;
+  animation: slideDownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calendar-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cal-nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.cal-nav-btn:hover {
+  background-color: var(--bg);
+  color: var(--text-primary);
+}
+
+.cal-month-year-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--teal);
+  font-family: var(--font);
+}
+
+.calendar-weekdays-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.calendar-weekday-cell {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.calendar-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-day-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  font-family: var(--font);
+  font-weight: 600;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--text-primary);
+}
+
+.calendar-day-cell.empty {
+  cursor: default;
+  pointer-events: none;
+}
+
+.calendar-day-cell.disabled {
+  color: var(--text-secondary);
+  opacity: 0.25;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.calendar-day-cell.available {
+  color: var(--text-primary);
+  background-color: #F8FAFC;
+  border: 1px solid rgba(0, 157, 208, 0.05);
+}
+
+.calendar-day-cell.available:hover {
+  background-color: var(--blue-light);
+  color: var(--blue-dark);
+  transform: scale(1.08);
+}
+
+.calendar-day-cell.selected {
+  background: var(--blue) !important;
+  color: #FFFFFF !important;
+  font-weight: 700;
+  box-shadow: 0 2px 8px var(--blue-area);
+}

@@ -17,7 +17,7 @@ const AcueductoSection = ({ allData, currentData, yearlyData, selectedYear, sele
         <div style={{ flex: 1, height: '1px', background: 'var(--border)', marginLeft: '10px' }}></div>
       </div>
 
-      <div className="kpi-row kpi-row--5">
+      <div className="kpi-row kpi-row--6">
         <KpiCard
           label="COBERTURA"
           value={currentData?.coberturaAcueducto}
@@ -46,6 +46,10 @@ const AcueductoSection = ({ allData, currentData, yearlyData, selectedYear, sele
           value={currentData?.iancAcumuladoExcel}
           suffix="%"
           ianc={true}
+        />
+        <KpiCard
+          label="USUARIOS"
+          value={currentData?.usuariosAcueducto}
         />
       </div>
 
