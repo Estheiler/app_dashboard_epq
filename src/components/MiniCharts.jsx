@@ -59,7 +59,7 @@ export const IancAcumuladoChart = ({ chartData }) => {
               fillOpacity={1}
               fill="url(#colorIanc)"
               connectNulls
-              dot={{ r: 3, stroke: '#009DD0', strokeWidth: 1.5, fill: '#FFFFFF' }}
+              dot={false}
               activeDot={{ r: 5, stroke: '#009DD0', strokeWidth: 2, fill: '#FFFFFF' }}
             />
           </AreaChart>
