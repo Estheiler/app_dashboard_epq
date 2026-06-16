@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './RegistroLecturaPage.css';
 
 function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserId, onBack }) {
   const [fecha, setFecha] = useState('');
@@ -11,9 +12,17 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   
-  // Estado para la tabla de últimas lecturas
+  // Estado para la tabla de últimas lecturas (Operario)
   const [recentReadings, setRecentReadings] = useState([]);
   const [readingsLoading, setReadingsLoading] = useState(false);
+
+  // Estados de edición y CRUD (Administradores)
+  const [allReadings, setAllReadings] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
   const apiBaseUrl = import.meta.env.VITE_API_URL || '';
   const isOperario = currentRole?.toLowerCase() === 'operario';
@@ -39,19 +48,11 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
       });
 
       if (!response.ok) {
-        throw new Error('No se pudieron cargar las lecturas recientes.');
+        throw new Error('No se pudieron cargar las lecturas.');
       }
 
       const result = await response.json();
       let data = result.data || [];
-
-      // Filtro adicional de seguridad en frontend para OPERARIO
-      if (isOperario) {
-        data = data.filter(r => 
-          String(r.operario_id) === String(currentUserId) || 
-          String(r.createdBy) === String(currentUserId)
-        );
-      }
 
       // Ordenar cronológicamente descendente por fecha y hora
       const sorted = data.sort((a, b) => {
@@ -60,10 +61,18 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
         return dateB - dateA;
       });
 
-      // Tomar solo las últimas 5 lecturas
-      setRecentReadings(sorted.slice(0, 5));
+      if (isOperario) {
+        // Filtro adicional de seguridad en frontend para OPERARIO
+        const operarioData = sorted.filter(r => 
+          String(r.operario_id) === String(currentUserId) || 
+          String(r.createdBy) === String(currentUserId)
+        );
+        setRecentReadings(operarioData.slice(0, 5));
+      } else {
+        setAllReadings(sorted);
+      }
     } catch (err) {
-      console.error('Error cargando lecturas recientes:', err);
+      console.error('Error cargando lecturas:', err);
     } finally {
       setReadingsLoading(false);
     }
@@ -74,6 +83,72 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
       fetchRecentReadings();
     }
   }, [token]);
+
+  const handleEditSelect = (row) => {
+    setIsEditing(true);
+    setEditingId(row.id);
+    setFecha(row.fecha);
+    setHora(row.hora);
+    setLecturaM3(row.lectura_m3 !== undefined ? row.lectura_m3 : (row.lectura || ''));
+    setObservaciones(row.observaciones || '');
+    setSuccessMessage('');
+    setErrorMessage('');
+    
+    // Focus in on the input
+    setTimeout(() => {
+      document.getElementById('lectura')?.focus();
+    }, 100);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditingId(null);
+    setLecturaM3('');
+    setObservaciones('');
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    setFecha(`${year}-${month}-${day}`);
+    setHora(1);
+    setSuccessMessage('');
+    setErrorMessage('');
+  };
+
+  const handleDeleteConfirm = async (id) => {
+    setSuccessMessage('');
+    setErrorMessage('');
+    try {
+      setLoading(true);
+      const response = await fetch(`${apiBaseUrl}/registro-macromedidor/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Error al eliminar la lectura.');
+      }
+
+      setSuccessMessage('Lectura eliminada y consumos recalculados exitosamente.');
+      setDeleteConfirmId(null);
+      
+      if (editingId === id) {
+        handleCancelEdit();
+      }
+      
+      fetchRecentReadings();
+    } catch (err) {
+      setErrorMessage(err.message || 'Error de conexión.');
+      setDeleteConfirmId(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -108,42 +183,120 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
         observaciones: observaciones.trim() || undefined
       };
 
-      const response = await fetch(`${apiBaseUrl}/registro-macromedidor`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      if (isEditing) {
+        // ACTUALIZACIÓN con fallback
+        try {
+          const response = await fetch(`${apiBaseUrl}/registro-macromedidor/${editingId}`, {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          });
 
-      const result = await response.json();
+          // Fallback para DELETE + POST si PATCH responde 404 o 405
+          if (response.status === 404 || response.status === 405) {
+            console.warn(`PATCH no soportado (Status ${response.status}). Aplicando fallback DELETE + POST.`);
+            
+            // Paso 1: Eliminar registro viejo
+            const deleteResponse = await fetch(`${apiBaseUrl}/registro-macromedidor/${editingId}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              }
+            });
 
-      if (response.status === 409) {
-        setErrorMessage('Ya existe una lectura registrada para esta fecha y hora.');
-        return;
-      }
+            if (!deleteResponse.ok) {
+              const delResult = await deleteResponse.json().catch(() => ({}));
+              throw new Error(delResult.message || 'Error al eliminar el registro anterior en fallback.');
+            }
 
-      if (!response.ok) {
-        throw new Error(result.message || 'Error al guardar la lectura de macromedición.');
-      }
+            // Paso 2: Crear el nuevo registro
+            const createResponse = await fetch(`${apiBaseUrl}/registro-macromedidor`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(payload)
+            });
 
-      // Éxito
-      setSuccessMessage(`Lectura registrada correctamente para la hora ${horaInt}.`);
-      setLecturaM3('');
-      setObservaciones('');
+            const createResult = await createResponse.json();
+            if (createResponse.status === 409) {
+              throw new Error('Ya existe una lectura registrada para la nueva fecha y hora.');
+            }
 
-      // Sugerir la siguiente hora
-      if (horaInt < 24) {
-        setHora(horaInt + 1);
+            if (!createResponse.ok) {
+              throw new Error(createResult.message || 'Error al recrear la lectura de macromedición en fallback.');
+            }
+
+            setSuccessMessage('Lectura actualizada correctamente.');
+            setIsEditing(false);
+            setEditingId(null);
+            setLecturaM3('');
+            setObservaciones('');
+            fetchRecentReadings();
+            return;
+          }
+
+          const result = await response.json();
+
+          if (response.status === 409) {
+            setErrorMessage('Ya existe una lectura registrada para esta fecha y hora.');
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error(result.message || 'Error al actualizar la lectura.');
+          }
+
+          setSuccessMessage('Lectura actualizada correctamente.');
+          setIsEditing(false);
+          setEditingId(null);
+          setLecturaM3('');
+          setObservaciones('');
+          fetchRecentReadings();
+        } catch (err) {
+          setErrorMessage(err.message || 'Error al actualizar la lectura.');
+        }
       } else {
-        // Si es la hora 24, sugerir hora 1 (para que el operario cambie de fecha manualmente o continúe)
-        setHora(1);
+        // CREACIÓN
+        const response = await fetch(`${apiBaseUrl}/registro-macromedidor`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await response.json();
+
+        if (response.status === 409) {
+          setErrorMessage('Ya existe una lectura registrada para esta fecha y hora.');
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(result.message || 'Error al guardar la lectura de macromedición.');
+        }
+
+        // Éxito
+        setSuccessMessage(`Lectura registrada correctamente para la hora ${horaInt}.`);
+        setLecturaM3('');
+        setObservaciones('');
+
+        // Sugerir la siguiente hora
+        if (horaInt < 24) {
+          setHora(horaInt + 1);
+        } else {
+          setHora(1);
+        }
+
+        fetchRecentReadings();
       }
-
-      // Actualizar la lista de lecturas recientes
-      fetchRecentReadings();
-
     } catch (err) {
       setErrorMessage(err.message || 'Error de conexión con el servidor.');
     } finally {
@@ -158,6 +311,20 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
       maximumFractionDigits: 2
     }).format(num);
   };
+
+  // Filtrar lecturas basado en la búsqueda por fecha
+  const filteredReadings = allReadings.filter(row => {
+    if (!searchQuery) return true;
+    return row.fecha.includes(searchQuery);
+  });
+
+  // Paginación local
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(filteredReadings.length / itemsPerPage);
+  const paginatedReadings = filteredReadings.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="registro-lectura-container">
@@ -181,9 +348,11 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
 
       <div className="registro-lectura-grid">
         {/* Formulario */}
-        <div className="form-card">
+        <div className={`form-card ${isEditing ? 'edit-mode' : ''}`}>
           <div className="card-header-simple">
-            <h3 className="card-section-title">Nueva Lectura</h3>
+            <h3 className="card-section-title">
+              {isEditing ? 'Editar Lectura' : 'Nueva Lectura'}
+            </h3>
           </div>
 
           <form onSubmit={handleSubmit} className="macro-form">
@@ -247,26 +416,92 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
               ></textarea>
             </div>
 
-            <button type="submit" className="submit-macro-btn" disabled={loading}>
-              {loading ? (
-                <span className="loading-btn-content">
-                  <span className="spinner-sm"></span>
-                  Registrando lectura...
-                </span>
-              ) : (
-                'Registrar Lectura'
-              )}
-            </button>
+            {isEditing ? (
+              <div className="form-actions-row">
+                <button type="submit" className="submit-macro-btn" disabled={loading}>
+                  {loading ? (
+                    <span className="loading-btn-content">
+                      <span className="spinner-sm"></span>
+                      Guardando...
+                    </span>
+                  ) : (
+                    'Guardar Cambios'
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className="cancel-macro-btn"
+                  onClick={handleCancelEdit}
+                  disabled={loading}
+                >
+                  Cancelar
+                </button>
+              </div>
+            ) : (
+              <button type="submit" className="submit-macro-btn" disabled={loading}>
+                {loading ? (
+                  <span className="loading-btn-content">
+                    <span className="spinner-sm"></span>
+                    Registrando lectura...
+                  </span>
+                ) : (
+                  'Registrar Lectura'
+                )}
+              </button>
+            )}
           </form>
         </div>
 
-        {/* Tabla de Apoyo */}
+        {/* Tabla de Apoyo / CRUD */}
         <div className="history-card">
+          {/* Modal / Overlay de Confirmación de Eliminación */}
+          {deleteConfirmId && (
+            <div className="delete-confirm-overlay">
+              <h4 className="delete-confirm-title">¿Eliminar lectura?</h4>
+              <p className="delete-confirm-text">
+                Esta acción es irreversible y recalculará automáticamente los consumos acumulados posteriores.
+              </p>
+              <div className="delete-confirm-actions">
+                <button 
+                  type="button" 
+                  className="btn-confirm-delete" 
+                  onClick={() => handleDeleteConfirm(deleteConfirmId)}
+                  disabled={loading}
+                >
+                  {loading ? 'Eliminando...' : 'Confirmar'}
+                </button>
+                <button 
+                  type="button" 
+                  className="btn-cancel-delete" 
+                  onClick={() => setDeleteConfirmId(null)}
+                  disabled={loading}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="card-header-simple">
             <h3 className="card-section-title">
-              {isOperario ? 'Mis últimas lecturas registradas' : 'Últimas lecturas registradas'}
+              {isOperario ? 'Mis últimas lecturas registradas' : 'Historial de lecturas (Administrador)'}
             </h3>
           </div>
+
+          {!isOperario && (
+            <div className="crud-filter-bar" style={{ padding: '0 16px', marginBottom: '8px' }}>
+              <input
+                type="text"
+                placeholder="Buscar por fecha (AAAA-MM-DD)..."
+                className="crud-search-input"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+          )}
 
           <div className="history-table-wrapper">
             {readingsLoading ? (
@@ -274,9 +509,9 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
                 <span className="spinner-sm"></span>
                 <span>Cargando historial...</span>
               </div>
-            ) : recentReadings.length === 0 ? (
+            ) : (isOperario ? recentReadings.length : filteredReadings.length) === 0 ? (
               <div className="table-placeholder empty">
-                <span>No tienes lecturas registradas recientemente.</span>
+                <span>No se encontraron lecturas registradas.</span>
               </div>
             ) : (
               <table className="compact-macro-table">
@@ -286,10 +521,11 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
                     <th>Hora</th>
                     <th>Lectura</th>
                     <th>Consumo</th>
+                    {!isOperario && <th className="actions-th">Acciones</th>}
                   </tr>
                 </thead>
                 <tbody>
-                  {recentReadings.map((row) => {
+                  {(isOperario ? recentReadings : paginatedReadings).map((row) => {
                     const lectura = parseFloat(row.lectura_m3) || parseFloat(row.lectura) || 0;
                     const consumo = parseFloat(row.consolidado_m3) || parseFloat(row.consolidado) || 0;
 
@@ -299,6 +535,38 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
                         <td className="td-bold">{`${row.hora.toString().padStart(2, '0')}:00`}</td>
                         <td>{formatNumber(lectura)}</td>
                         <td className="text-primary font-bold">{formatNumber(consumo)}</td>
+                        {!isOperario && (
+                          <td className="actions-td">
+                            <div className="action-buttons-cell">
+                              <button
+                                type="button"
+                                className="btn-row-action edit-btn"
+                                title="Editar registro"
+                                onClick={() => handleEditSelect(row)}
+                                disabled={loading}
+                              >
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M12 20h9"></path>
+                                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                </svg>
+                              </button>
+                              <button
+                                type="button"
+                                className="btn-row-action delete-btn"
+                                title="Eliminar registro"
+                                onClick={() => setDeleteConfirmId(row.id)}
+                                disabled={loading}
+                              >
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="3 6 5 6 21 6"></polyline>
+                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     );
                   })}
@@ -306,6 +574,29 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
               </table>
             )}
           </div>
+
+          {!isOperario && totalPages > 1 && (
+            <div className="table-pagination" style={{ margin: '12px 16px' }}>
+              <button
+                className="pagination-btn"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                &larr; Anterior
+              </button>
+              <span className="pagination-info">
+                Página <strong>{currentPage}</strong> de {totalPages}
+              </span>
+              <button
+                className="pagination-btn"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Siguiente &rarr;
+              </button>
+            </div>
+          )}
+
           <div className="history-card-footer">
             <p className="helper-text">
               * El consumo (m³/h) es calculado automáticamente por el backend.

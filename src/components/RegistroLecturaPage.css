@@ -1,0 +1,208 @@
+/* ==========================================================================
+   CRUD styles for RegistroLecturaPage
+   ========================================================================== */
+
+/* Edición Form Card Highlights */
+.form-card.edit-mode {
+  border: 1px solid var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-area);
+}
+
+.form-card.edit-mode .card-header-simple {
+  background-color: var(--blue-light);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  margin: -1px -1px 16px -1px;
+}
+
+.form-card.edit-mode .card-section-title {
+  color: var(--blue-dark);
+}
+
+/* Cancel button */
+.cancel-macro-btn {
+  background-color: #FAFBFD;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: var(--font);
+  padding: 11px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cancel-macro-btn:hover {
+  background-color: #F1F5F9;
+  color: var(--text-primary);
+  border-color: #CBD5E1;
+}
+
+.form-actions-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+/* CRUD Search and Filter Bar */
+.crud-filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.crud-search-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  font-family: var(--font);
+  color: var(--text-primary);
+  background-color: #FAFBFD;
+  transition: all 0.2s ease;
+}
+
+.crud-search-input:focus {
+  outline: none;
+  border-color: var(--blue);
+  background-color: #FFFFFF;
+}
+
+/* CRUD Action Buttons in table */
+.action-buttons-cell {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.btn-row-action {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-row-action.edit-btn {
+  color: var(--blue-dark);
+}
+
+.btn-row-action.edit-btn:hover {
+  background-color: var(--blue-light);
+  color: var(--blue);
+}
+
+.btn-row-action.delete-btn {
+  color: #DC3545;
+}
+
+.btn-row-action.delete-btn:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #C82333;
+}
+
+/* Delete confirmation overlay */
+.delete-confirm-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border-radius: var(--radius);
+  z-index: 10;
+  text-align: center;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.delete-confirm-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #DC3545;
+  margin-bottom: 6px;
+}
+
+.delete-confirm-text {
+  font-size: 12px;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.delete-confirm-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-confirm-delete {
+  background-color: #DC3545;
+  color: #FFFFFF;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-confirm-delete:hover {
+  background-color: #C82333;
+}
+
+.btn-cancel-delete {
+  background-color: #FAFBFD;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel-delete:hover {
+  background-color: #F1F5F9;
+  color: var(--text-primary);
+}
+
+/* Compact macro table updates */
+.compact-macro-table th.actions-th {
+  text-align: right;
+  padding-right: 20px;
+}
+
+.compact-macro-table td.actions-td {
+  padding-right: 14px;
+}
+
+/* History card container positioning constraint */
+.history-card {
+  position: relative;
+}
