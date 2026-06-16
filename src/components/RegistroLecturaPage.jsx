@@ -516,6 +516,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
                     <th>Hora</th>
                     <th>Lectura</th>
                     <th>Consumo</th>
+                    <th>Registrado Por</th>
                     {!isOperario && <th className="actions-th">Acciones</th>}
                   </tr>
                 </thead>
@@ -523,6 +524,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
                   {(isOperario ? recentReadings : paginatedReadings).map((row) => {
                     const lectura = parseFloat(row.lectura_m3) || parseFloat(row.lectura) || 0;
                     const consumo = parseFloat(row.consolidado_m3) || parseFloat(row.consolidado) || 0;
+                    const creador = row.createdByUser?.username || 'Sistema';
 
                     return (
                       <tr key={row.id}>
@@ -530,6 +532,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
                         <td className="td-bold">{`${row.hora.toString().padStart(2, '0')}:00`}</td>
                         <td>{formatNumber(lectura)}</td>
                         <td className="text-primary font-bold">{formatNumber(consumo)}</td>
+                        <td className="td-italic" style={{ color: 'var(--text-secondary)' }}>{creador}</td>
                         {!isOperario && (
                           <td className="actions-td">
                             <div className="action-buttons-cell">
