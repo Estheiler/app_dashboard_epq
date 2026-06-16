@@ -173,15 +173,13 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
     try {
       setLoading(true);
 
-      const payload = {
-        fecha,
-        hora: horaInt,
-        lectura_m3: lecturaFloat,
-        observaciones: observaciones.trim() || undefined
-      };
-
       if (isEditing) {
         // ACTUALIZACIÓN con fallback
+        const updatePayload = {
+          lectura_m3: lecturaFloat,
+          observaciones: observaciones.trim() || undefined
+        };
+
         try {
           const response = await fetch(`${apiBaseUrl}/registro-macromedidor/${editingId}`, {
             method: 'PATCH',
@@ -189,7 +187,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify(updatePayload),
           });
 
           // Fallback para DELETE + POST si PATCH responde 404 o 405
@@ -210,14 +208,21 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
               throw new Error(delResult.message || 'Error al eliminar el registro anterior en fallback.');
             }
 
-            // Paso 2: Crear el nuevo registro
+            // Paso 2: Crear el nuevo registro (en fallback sí enviamos fecha/hora original para recrearlo)
+            const createPayload = {
+              fecha,
+              hora: horaInt,
+              lectura_m3: lecturaFloat,
+              observaciones: observaciones.trim() || undefined
+            };
+
             const createResponse = await fetch(`${apiBaseUrl}/registro-macromedidor`, {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify(payload)
+              body: JSON.stringify(createPayload)
             });
 
             const createResult = await createResponse.json();
@@ -260,13 +265,20 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
         }
       } else {
         // CREACIÓN
+        const createPayload = {
+          fecha,
+          hora: horaInt,
+          lectura_m3: lecturaFloat,
+          observaciones: observaciones.trim() || undefined
+        };
+
         const response = await fetch(`${apiBaseUrl}/registro-macromedidor`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(createPayload),
         });
 
         const result = await response.json();
@@ -547,7 +559,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
                     value={fecha}
                     onChange={(e) => setFecha(e.target.value)}
                     required
-                    disabled={loading}
+                    disabled={loading || isEditing}
                   />
                 </div>
 
@@ -561,7 +573,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
                     value={hora}
                     onChange={(e) => setHora(e.target.value)}
                     required
-                    disabled={loading}
+                    disabled={loading || isEditing}
                     placeholder="Ej: 14"
                   />
                   <span className="input-helper">Formato de 1 a 24 horas</span>
