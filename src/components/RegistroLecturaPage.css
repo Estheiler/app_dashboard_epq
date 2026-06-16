@@ -205,11 +205,19 @@
 /* History card container positioning constraint */
 .history-card {
   position: relative;
+  width: 100% !important;
 }
 
 /* Stacked layout to place table below the form and span full width */
 .registro-lectura-grid {
   display: flex !important;
   flex-direction: column !important;
+  align-items: stretch !important;
   gap: 25px;
+}
+
+/* Form card width constraint for optimal readability */
+.form-card {
+  max-width: 600px;
+  width: 100%;
 }
