@@ -206,3 +206,10 @@
 .history-card {
   position: relative;
 }
+
+/* Stacked layout to place table below the form and span full width */
+.registro-lectura-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 25px;
+}

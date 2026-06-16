@@ -62,12 +62,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
       });
 
       if (isOperario) {
-        // Filtro adicional de seguridad en frontend para OPERARIO
-        const operarioData = sorted.filter(r => 
-          String(r.operario_id) === String(currentUserId) || 
-          String(r.createdBy) === String(currentUserId)
-        );
-        setRecentReadings(operarioData.slice(0, 5));
+        setRecentReadings(sorted.slice(0, 5));
       } else {
         setAllReadings(sorted);
       }
