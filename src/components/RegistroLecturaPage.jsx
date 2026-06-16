@@ -12,8 +12,6 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Estado para la tabla de últimas lecturas (Operario)
-  const [recentReadings, setRecentReadings] = useState([]);
   const [readingsLoading, setReadingsLoading] = useState(false);
 
   // Estados de edición y CRUD (Administradores)
@@ -62,11 +60,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
         return dateB - dateA;
       });
 
-      if (isOperario) {
-        setRecentReadings(sorted.slice(0, 5));
-      } else {
-        setAllReadings(sorted);
-      }
+      setAllReadings(sorted);
     } catch (err) {
       console.error('Error cargando lecturas:', err);
     } finally {
@@ -387,7 +381,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
 
         <div className="card-header-simple" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 className="card-section-title">
-            {isOperario ? 'Mis últimas lecturas registradas' : 'Historial de lecturas (Administrador)'}
+            {isOperario ? 'Historial de lecturas' : 'Historial de lecturas (Administrador)'}
           </h3>
           <button 
             type="button" 
@@ -407,20 +401,18 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
           </button>
         </div>
 
-        {!isOperario && (
-          <div className="crud-filter-bar" style={{ padding: '0 16px', marginBottom: '8px' }}>
-            <input
-              type="text"
-              placeholder="Buscar por fecha (AAAA-MM-DD)..."
-              className="crud-search-input"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-            />
-          </div>
-        )}
+        <div className="crud-filter-bar" style={{ padding: '0 16px', marginBottom: '8px' }}>
+          <input
+            type="text"
+            placeholder="Buscar por fecha (AAAA-MM-DD)..."
+            className="crud-search-input"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+          />
+        </div>
 
         <div className="history-table-wrapper">
           {readingsLoading ? (
@@ -428,7 +420,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
               <span className="spinner-sm"></span>
               <span>Cargando historial...</span>
             </div>
-          ) : (isOperario ? recentReadings.length : filteredReadings.length) === 0 ? (
+          ) : filteredReadings.length === 0 ? (
             <div className="table-placeholder empty">
               <span>No se encontraron lecturas registradas.</span>
             </div>
@@ -445,7 +437,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
                 </tr>
               </thead>
               <tbody>
-                {(isOperario ? recentReadings : paginatedReadings).map((row) => {
+                {paginatedReadings.map((row) => {
                   const lectura = parseFloat(row.lectura_m3) || parseFloat(row.lectura) || 0;
                   const consumo = parseFloat(row.consolidado_m3) || parseFloat(row.consolidado) || 0;
                   const creador = row.createdByUser?.username || 'Sistema';
@@ -497,7 +489,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
           )}
         </div>
 
-        {!isOperario && totalPages > 1 && (
+        {totalPages > 1 && (
           <div className="table-pagination" style={{ margin: '12px 16px' }}>
             <button
               className="pagination-btn"
