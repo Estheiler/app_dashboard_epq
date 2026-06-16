@@ -6,12 +6,12 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
   const [hora, setHora] = useState(1);
   const [lecturaM3, setLecturaM3] = useState('');
   const [observaciones, setObservaciones] = useState('');
-  
+
   // Estados de carga y mensajes
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  
+
   // Estado para la tabla de últimas lecturas (Operario)
   const [recentReadings, setRecentReadings] = useState([]);
   const [readingsLoading, setReadingsLoading] = useState(false);
@@ -23,6 +23,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [showFormModal, setShowFormModal] = useState(false);
 
   const apiBaseUrl = import.meta.env.VITE_API_URL || '';
   const isOperario = currentRole?.toLowerCase() === 'operario';
@@ -88,7 +89,8 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
     setObservaciones(row.observaciones || '');
     setSuccessMessage('');
     setErrorMessage('');
-    
+    setShowFormModal(true);
+
     // Focus in on the input
     setTimeout(() => {
       document.getElementById('lectura')?.focus();
@@ -131,11 +133,11 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
 
       setSuccessMessage('Lectura eliminada y consumos recalculados exitosamente.');
       setDeleteConfirmId(null);
-      
+
       if (editingId === id) {
         handleCancelEdit();
       }
-      
+
       fetchRecentReadings();
     } catch (err) {
       setErrorMessage(err.message || 'Error de conexión.');
@@ -170,7 +172,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
 
     try {
       setLoading(true);
-      
+
       const payload = {
         fecha,
         hora: horaInt,
@@ -193,7 +195,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
           // Fallback para DELETE + POST si PATCH responde 404 o 405
           if (response.status === 404 || response.status === 405) {
             console.warn(`PATCH no soportado (Status ${response.status}). Aplicando fallback DELETE + POST.`);
-            
+
             // Paso 1: Eliminar registro viejo
             const deleteResponse = await fetch(`${apiBaseUrl}/registro-macromedidor/${editingId}`, {
               method: 'DELETE',
@@ -228,11 +230,11 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
             }
 
             setSuccessMessage('Lectura actualizada correctamente.');
-            setIsEditing(false);
-            setEditingId(null);
-            setLecturaM3('');
-            setObservaciones('');
             fetchRecentReadings();
+            setTimeout(() => {
+              setShowFormModal(false);
+              handleCancelEdit();
+            }, 1500);
             return;
           }
 
@@ -248,11 +250,11 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
           }
 
           setSuccessMessage('Lectura actualizada correctamente.');
-          setIsEditing(false);
-          setEditingId(null);
-          setLecturaM3('');
-          setObservaciones('');
           fetchRecentReadings();
+          setTimeout(() => {
+            setShowFormModal(false);
+            handleCancelEdit();
+          }, 1500);
         } catch (err) {
           setErrorMessage(err.message || 'Error al actualizar la lectura.');
         }
@@ -341,267 +343,285 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
         </div>
       </div>
 
-      <div className="registro-lectura-grid">
-        {/* Formulario */}
-        <div className={`form-card ${isEditing ? 'edit-mode' : ''}`}>
-          <div className="card-header-simple">
-            <h3 className="card-section-title">
-              {isEditing ? 'Editar Lectura' : 'Nueva Lectura'}
-            </h3>
+      {/* Tabla de Historial / CRUD */}
+      <div className="history-card">
+        {/* Modal / Overlay de Confirmación de Eliminación */}
+        {deleteConfirmId && (
+          <div className="delete-confirm-overlay">
+            <h4 className="delete-confirm-title">¿Eliminar lectura?</h4>
+            <p className="delete-confirm-text">
+              Esta acción es irreversible y recalculará automáticamente los consumos acumulados posteriores.
+            </p>
+            <div className="delete-confirm-actions">
+              <button 
+                type="button" 
+                className="btn-confirm-delete" 
+                onClick={() => handleDeleteConfirm(deleteConfirmId)}
+                disabled={loading}
+              >
+                {loading ? 'Eliminando...' : 'Confirmar'}
+              </button>
+              <button 
+                type="button" 
+                className="btn-cancel-delete" 
+                onClick={() => setDeleteConfirmId(null)}
+                disabled={loading}
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
+        )}
 
-          <form onSubmit={handleSubmit} className="macro-form">
-            {successMessage && <div className="feedback-message success-alert">{successMessage}</div>}
-            {errorMessage && <div className="feedback-message error-alert">{errorMessage}</div>}
+        <div className="card-header-simple" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 className="card-section-title">
+            {isOperario ? 'Mis últimas lecturas registradas' : 'Historial de lecturas (Administrador)'}
+          </h3>
+          <button 
+            type="button" 
+            className="add-reading-btn" 
+            onClick={() => {
+              setShowFormModal(true);
+              setIsEditing(false);
+              setSuccessMessage('');
+              setErrorMessage('');
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Agregar Lectura
+          </button>
+        </div>
 
-            <div className="form-row-grid">
-              <div className="form-group">
-                <label htmlFor="fecha">Fecha</label>
-                <input
-                  type="date"
-                  id="fecha"
-                  value={fecha}
-                  onChange={(e) => setFecha(e.target.value)}
-                  required
-                  disabled={loading}
-                />
+        {!isOperario && (
+          <div className="crud-filter-bar" style={{ padding: '0 16px', marginBottom: '8px' }}>
+            <input
+              type="text"
+              placeholder="Buscar por fecha (AAAA-MM-DD)..."
+              className="crud-search-input"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+        )}
+
+        <div className="history-table-wrapper">
+          {readingsLoading ? (
+            <div className="table-placeholder">
+              <span className="spinner-sm"></span>
+              <span>Cargando historial...</span>
+            </div>
+          ) : (isOperario ? recentReadings.length : filteredReadings.length) === 0 ? (
+            <div className="table-placeholder empty">
+              <span>No se encontraron lecturas registradas.</span>
+            </div>
+          ) : (
+            <table className="compact-macro-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Lectura</th>
+                  <th>Consumo</th>
+                  <th>Registrado Por</th>
+                  {!isOperario && <th className="actions-th">Acciones</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {(isOperario ? recentReadings : paginatedReadings).map((row) => {
+                  const lectura = parseFloat(row.lectura_m3) || parseFloat(row.lectura) || 0;
+                  const consumo = parseFloat(row.consolidado_m3) || parseFloat(row.consolidado) || 0;
+                  const creador = row.createdByUser?.username || 'Sistema';
+
+                  return (
+                    <tr key={row.id}>
+                      <td>{row.fecha}</td>
+                      <td className="td-bold">{`${row.hora.toString().padStart(2, '0')}:00`}</td>
+                      <td>{formatNumber(lectura)}</td>
+                      <td className="text-primary font-bold">{formatNumber(consumo)}</td>
+                      <td className="td-italic" style={{ color: 'var(--text-secondary)' }}>{creador}</td>
+                      {!isOperario && (
+                        <td className="actions-td">
+                          <div className="action-buttons-cell">
+                            <button
+                              type="button"
+                              className="btn-row-action edit-btn"
+                              title="Editar registro"
+                              onClick={() => handleEditSelect(row)}
+                              disabled={loading}
+                            >
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 20h9"></path>
+                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                              </svg>
+                            </button>
+                            <button
+                              type="button"
+                              className="btn-row-action delete-btn"
+                              title="Eliminar registro"
+                              onClick={() => setDeleteConfirmId(row.id)}
+                              disabled={loading}
+                            >
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                <line x1="10" y1="11" x2="10" y2="17"></line>
+                                <line x1="14" y1="11" x2="14" y2="17"></line>
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {!isOperario && totalPages > 1 && (
+          <div className="table-pagination" style={{ margin: '12px 16px' }}>
+            <button
+              className="pagination-btn"
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              &larr; Anterior
+            </button>
+            <span className="pagination-info">
+              Página <strong>{currentPage}</strong> de {totalPages}
+            </span>
+            <button
+              className="pagination-btn"
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Siguiente &rarr;
+            </button>
+          </div>
+        )}
+
+        <div className="history-card-footer">
+          <p className="helper-text">
+            * El consumo (m³/h) es calculado automáticamente por el backend.
+          </p>
+        </div>
+      </div>
+
+      {/* MODAL: REGISTRAR / EDITAR LECTURA */}
+      {showFormModal && (
+        <div className="modal-backdrop">
+          <div className="modal-content-card" style={{ maxWidth: '500px', width: '100%' }}>
+            <div className="modal-card-header">
+              <h3 className="modal-card-title">
+                {isEditing ? 'Editar Lectura' : 'Nueva Lectura'}
+              </h3>
+              <button 
+                type="button" 
+                className="modal-close-btn" 
+                onClick={() => {
+                  setShowFormModal(false);
+                  handleCancelEdit();
+                }}
+              >
+                &times;
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="modal-form">
+              {successMessage && <div className="feedback-message success-alert" style={{ marginBottom: '16px' }}>{successMessage}</div>}
+              {errorMessage && <div className="feedback-message error-alert" style={{ marginBottom: '16px' }}>{errorMessage}</div>}
+
+              <div className="form-row-grid">
+                <div className="form-group">
+                  <label htmlFor="fecha">Fecha</label>
+                  <input
+                    type="date"
+                    id="fecha"
+                    value={fecha}
+                    onChange={(e) => setFecha(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="hora">Hora (1 - 24)</label>
+                  <input
+                    type="number"
+                    id="hora"
+                    min="1"
+                    max="24"
+                    value={hora}
+                    onChange={(e) => setHora(e.target.value)}
+                    required
+                    disabled={loading}
+                    placeholder="Ej: 14"
+                  />
+                  <span className="input-helper">Formato de 1 a 24 horas</span>
+                </div>
               </div>
 
               <div className="form-group">
-                <label htmlFor="hora">Hora (1 - 24)</label>
+                <label htmlFor="lectura">Lectura (m³)</label>
                 <input
                   type="number"
-                  id="hora"
-                  min="1"
-                  max="24"
-                  value={hora}
-                  onChange={(e) => setHora(e.target.value)}
+                  step="any"
+                  id="lectura"
+                  value={lecturaM3}
+                  onChange={(e) => setLecturaM3(e.target.value)}
                   required
                   disabled={loading}
-                  placeholder="Ej: 14"
+                  placeholder="Ingresa la lectura en m³"
                 />
-                <span className="input-helper">Formato de 1 a 24 horas</span>
+                <span className="input-helper">Ej: 12450.80</span>
               </div>
-            </div>
 
-            <div className="form-group">
-              <label htmlFor="lectura">Lectura (m³)</label>
-              <input
-                type="number"
-                step="any"
-                id="lectura"
-                value={lecturaM3}
-                onChange={(e) => setLecturaM3(e.target.value)}
-                required
-                disabled={loading}
-                placeholder="Ingresa la lectura del macromedidor en m³"
-              />
-              <span className="input-helper">Ej: 12450.80</span>
-            </div>
+              <div className="form-group">
+                <label htmlFor="observaciones">Observaciones (Opcional)</label>
+                <textarea
+                  id="observaciones"
+                  rows="3"
+                  value={observaciones}
+                  onChange={(e) => setObservaciones(e.target.value)}
+                  disabled={loading}
+                  placeholder="Indica si hay novedades en la lectura o el macromedidor..."
+                ></textarea>
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="observaciones">Observaciones (Opcional)</label>
-              <textarea
-                id="observaciones"
-                rows="3"
-                value={observaciones}
-                onChange={(e) => setObservaciones(e.target.value)}
-                disabled={loading}
-                placeholder="Indica si hay novedades en la lectura o el macromedidor..."
-              ></textarea>
-            </div>
-
-            {isEditing ? (
-              <div className="form-actions-row">
-                <button type="submit" className="submit-macro-btn" disabled={loading}>
+              <div className="modal-card-actions">
+                <button
+                  type="button"
+                  className="btn-cancel"
+                  onClick={() => {
+                    setShowFormModal(false);
+                    handleCancelEdit();
+                  }}
+                  disabled={loading}
+                >
+                  Cancelar
+                </button>
+                <button type="submit" className="btn-confirm" disabled={loading}>
                   {loading ? (
                     <span className="loading-btn-content">
                       <span className="spinner-sm"></span>
-                      Guardando...
+                      Procesando...
                     </span>
                   ) : (
-                    'Guardar Cambios'
+                    isEditing ? 'Guardar Cambios' : 'Registrar Lectura'
                   )}
                 </button>
-                <button
-                  type="button"
-                  className="cancel-macro-btn"
-                  onClick={handleCancelEdit}
-                  disabled={loading}
-                >
-                  Cancelar
-                </button>
               </div>
-            ) : (
-              <button type="submit" className="submit-macro-btn" disabled={loading}>
-                {loading ? (
-                  <span className="loading-btn-content">
-                    <span className="spinner-sm"></span>
-                    Registrando lectura...
-                  </span>
-                ) : (
-                  'Registrar Lectura'
-                )}
-              </button>
-            )}
-          </form>
-        </div>
-
-        {/* Tabla de Apoyo / CRUD */}
-        <div className="history-card">
-          {/* Modal / Overlay de Confirmación de Eliminación */}
-          {deleteConfirmId && (
-            <div className="delete-confirm-overlay">
-              <h4 className="delete-confirm-title">¿Eliminar lectura?</h4>
-              <p className="delete-confirm-text">
-                Esta acción es irreversible y recalculará automáticamente los consumos acumulados posteriores.
-              </p>
-              <div className="delete-confirm-actions">
-                <button 
-                  type="button" 
-                  className="btn-confirm-delete" 
-                  onClick={() => handleDeleteConfirm(deleteConfirmId)}
-                  disabled={loading}
-                >
-                  {loading ? 'Eliminando...' : 'Confirmar'}
-                </button>
-                <button 
-                  type="button" 
-                  className="btn-cancel-delete" 
-                  onClick={() => setDeleteConfirmId(null)}
-                  disabled={loading}
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div className="card-header-simple">
-            <h3 className="card-section-title">
-              {isOperario ? 'Mis últimas lecturas registradas' : 'Historial de lecturas (Administrador)'}
-            </h3>
-          </div>
-
-          {!isOperario && (
-            <div className="crud-filter-bar" style={{ padding: '0 16px', marginBottom: '8px' }}>
-              <input
-                type="text"
-                placeholder="Buscar por fecha (AAAA-MM-DD)..."
-                className="crud-search-input"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
-              />
-            </div>
-          )}
-
-          <div className="history-table-wrapper">
-            {readingsLoading ? (
-              <div className="table-placeholder">
-                <span className="spinner-sm"></span>
-                <span>Cargando historial...</span>
-              </div>
-            ) : (isOperario ? recentReadings.length : filteredReadings.length) === 0 ? (
-              <div className="table-placeholder empty">
-                <span>No se encontraron lecturas registradas.</span>
-              </div>
-            ) : (
-              <table className="compact-macro-table">
-                <thead>
-                  <tr>
-                    <th>Fecha</th>
-                    <th>Hora</th>
-                    <th>Lectura</th>
-                    <th>Consumo</th>
-                    <th>Registrado Por</th>
-                    {!isOperario && <th className="actions-th">Acciones</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(isOperario ? recentReadings : paginatedReadings).map((row) => {
-                    const lectura = parseFloat(row.lectura_m3) || parseFloat(row.lectura) || 0;
-                    const consumo = parseFloat(row.consolidado_m3) || parseFloat(row.consolidado) || 0;
-                    const creador = row.createdByUser?.username || 'Sistema';
-
-                    return (
-                      <tr key={row.id}>
-                        <td>{row.fecha}</td>
-                        <td className="td-bold">{`${row.hora.toString().padStart(2, '0')}:00`}</td>
-                        <td>{formatNumber(lectura)}</td>
-                        <td className="text-primary font-bold">{formatNumber(consumo)}</td>
-                        <td className="td-italic" style={{ color: 'var(--text-secondary)' }}>{creador}</td>
-                        {!isOperario && (
-                          <td className="actions-td">
-                            <div className="action-buttons-cell">
-                              <button
-                                type="button"
-                                className="btn-row-action edit-btn"
-                                title="Editar registro"
-                                onClick={() => handleEditSelect(row)}
-                                disabled={loading}
-                              >
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="M12 20h9"></path>
-                                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                                </svg>
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-row-action delete-btn"
-                                title="Eliminar registro"
-                                onClick={() => setDeleteConfirmId(row.id)}
-                                disabled={loading}
-                              >
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="3 6 5 6 21 6"></polyline>
-                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                  <line x1="10" y1="11" x2="10" y2="17"></line>
-                                  <line x1="14" y1="11" x2="14" y2="17"></line>
-                                </svg>
-                              </button>
-                            </div>
-                          </td>
-                        )}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
-          </div>
-
-          {!isOperario && totalPages > 1 && (
-            <div className="table-pagination" style={{ margin: '12px 16px' }}>
-              <button
-                className="pagination-btn"
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-              >
-                &larr; Anterior
-              </button>
-              <span className="pagination-info">
-                Página <strong>{currentPage}</strong> de {totalPages}
-              </span>
-              <button
-                className="pagination-btn"
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-              >
-                Siguiente &rarr;
-              </button>
-            </div>
-          )}
-
-          <div className="history-card-footer">
-            <p className="helper-text">
-              * El consumo (m³/h) es calculado automáticamente por el backend.
-            </p>
+            </form>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

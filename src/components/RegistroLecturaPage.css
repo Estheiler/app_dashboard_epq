@@ -221,3 +221,31 @@
   max-width: 600px;
   width: 100%;
 }
+
+/* Add reading button style */
+.add-reading-btn {
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+  color: #FFFFFF;
+  border: none;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 4px 10px rgba(0, 157, 208, 0.15);
+  font-family: var(--font);
+}
+
+.add-reading-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 157, 208, 0.25);
+  filter: brightness(1.05);
+}
+
+.add-reading-btn:active {
+  transform: translateY(0);
+}
