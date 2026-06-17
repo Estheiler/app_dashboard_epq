@@ -433,7 +433,7 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
                   <th>Lectura</th>
                   <th>Consumo</th>
                   <th>Registrado Por</th>
-                  {!isOperario && <th className="actions-th">Acciones</th>}
+                  <th className="actions-th">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -449,9 +449,9 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
                       <td>{formatNumber(lectura)}</td>
                       <td className="text-primary font-bold">{formatNumber(consumo)}</td>
                       <td className="td-italic" style={{ color: 'var(--text-secondary)' }}>{creador}</td>
-                      {!isOperario && (
-                        <td className="actions-td">
-                          <div className="action-buttons-cell">
+                      <td className="actions-td">
+                        <div className="action-buttons-cell">
+                          {(!isOperario || row.createdBy === currentUserId || row.createdByUser?.id === currentUserId) && (
                             <button
                               type="button"
                               className="btn-row-action edit-btn"
@@ -464,6 +464,8 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
                                 <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                               </svg>
                             </button>
+                          )}
+                          {!isOperario && (
                             <button
                               type="button"
                               className="btn-row-action delete-btn"
@@ -478,9 +480,9 @@ function RegistroLecturaPage({ token, currentUsername, currentRole, currentUserI
                                 <line x1="14" y1="11" x2="14" y2="17"></line>
                               </svg>
                             </button>
-                          </div>
-                        </td>
-                      )}
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
